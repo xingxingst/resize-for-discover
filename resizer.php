@@ -256,7 +256,7 @@ class ImageResizerForDiscover
         $originalImage = FALSE;
 
         if (is_array($imageInfo) === FALSE) {
-            throw new Exception('指定されたパスは画像ファイルではない');
+            throw new Exception('This path is not a image.');
         }
 
         switch ($imageInfo[2]) {
@@ -270,7 +270,7 @@ class ImageResizerForDiscover
                 $originalImage = imagecreatefrompng($this->path);
                 break;
             default:
-                throw new Exception('縮小版に対応していない形式');
+                throw new Exception('This type is not supported.');
         }
 
         if ($originalImage === FALSE) {

@@ -145,6 +145,7 @@ class resizeForDiscoverAttachmentPage{
             'value' => $field_value == 'transparent' ? '' : $field_value,
             'label' => __( 'Background color for resize' ),
         );
+
         ob_start();
         ?>
         <script>
@@ -157,7 +158,12 @@ class resizeForDiscoverAttachmentPage{
         $form_fields['text_color_js'] = array(
             'tr' => $text_color_js, // Adds free-form stuff to table.
         );
-        $form_fields['resize-for-discover-transparent'] = array(
+        $imagepath= get_attached_file($post->ID);
+        $type = wp_check_filetype($imagepath);
+        
+        $form_fields['resize-for-discover-transparent'] =
+        $type['ext'] === 'png'
+        ? array(
             'input' => 'html',
             // 'html' => '<label for="attachments-discover-transparent-'.$post->ID.'"> '.
             //     '<input type="checkbox" id="attachments-discover-transparent-'.$post->ID.'" name="attachments['.$post->ID.'][resize-for-discover-transparent]" value="transparent"'.($field_value=='transparent' ? ' checked="checked"' : '').' />transparent(png only)</label>  ',
@@ -165,7 +171,9 @@ class resizeForDiscoverAttachmentPage{
             'helps' => 'If you fill the checkbox, This setting takes priority.',
             'value' => 'transparent',
             'label' => '',
-        );
+          )
+        : array('input' => 'hidden', 'value' => '');
+
         return $form_fields;
     }
 
