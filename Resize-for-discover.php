@@ -2,11 +2,11 @@
 /*
   Plugin Name:  Resize for discover
   Plugin URI:
-  Description: You can resize image for google discover and AMP⚡ by using this plugin.
+  Description: You can resize images for google discover and AMP⚡ by using this wp plugin.
   Version: 0.0.1
   Author:  xingxingst
   Author URI: 
-  License: xingxingst
+  License: GPL
   https://developers.google.com/search/docs/data-types/article?#article_types
  */
 if ( ! defined( 'ABSPATH' ) ) {
