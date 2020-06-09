@@ -1,6 +1,6 @@
 <?php
 /*
-  Plugin Name:  Resize for discover
+  Plugin Name: Resize for discover
   Plugin URI:
   Description: You can resize images for google discover and AMP⚡ by using this wp plugin.
   Version: 0.0.1
@@ -83,6 +83,10 @@ class resizeForDiscover{
     }
 
     public function add_image_sizes(){
+        $saveNewSize = get_option( resizeForDiscoverSettingsPage::OPTION );
+        if(empty($saveNewSize['field1']['resize-for-discover-newsize']))
+            return;
+
         $width = 1200;
         add_image_size( 'resize_for_discover_hd', $width, 675, true );
         add_image_size( 'resize_for_discover_crt', $width, 900, true );
@@ -140,9 +144,10 @@ class resizeForDiscoverAttachmentPage{
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-background', true );
         $saveColor = $this->getInitialColor();
         $field_value = $field_value ? $field_value : $saveColor;
+        $transparentBool = $field_value == 'transparent';
         $form_fields['resize-for-discover-background'] = array(
             'input' => 'text',
-            'value' => $field_value == 'transparent' ? '' : $field_value,
+            'value' => $transparentBool ? '' : $field_value,
             'label' => __( 'Background color for resize' ),
         );
 
@@ -160,26 +165,30 @@ class resizeForDiscoverAttachmentPage{
         );
         $imagepath= get_attached_file($post->ID);
         $type = wp_check_filetype($imagepath);
-        
-        $form_fields['resize-for-discover-transparent'] =
-        $type['ext'] === 'png'
-        ? array(
-            'input' => 'html',
-            // 'html' => '<label for="attachments-discover-transparent-'.$post->ID.'"> '.
-            //     '<input type="checkbox" id="attachments-discover-transparent-'.$post->ID.'" name="attachments['.$post->ID.'][resize-for-discover-transparent]" value="transparent"'.($field_value=='transparent' ? ' checked="checked"' : '').' />transparent(png only)</label>  ',
-            'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-transparent', 'transparent',$field_value, 'transparent(png only)'),
-            'helps' => 'If you fill the checkbox, This setting takes priority.',
-            'value' => 'transparent',
-            'label' => '',
-          )
-        : array('input' => 'hidden', 'value' => '');
+
+        if($type['ext'] === 'png'){
+            $saveTransparent = get_option( resizeForDiscoverSettingsPage::OPTION );
+            $field_value = empty($saveTransparent['field1']['resize-for-discover-transparent']) && !$transparentBool ? '' :  'transparent';
+            $form_fields['resize-for-discover-transparent'] = 
+            array(
+                'input' => 'html',
+                // 'html' => '<label for="attachments-discover-transparent-'.$post->ID.'"> '.
+                //     '<input type="checkbox" id="attachments-discover-transparent-'.$post->ID.'" name="attachments['.$post->ID.'][resize-for-discover-transparent]" value="transparent"'.($field_value=='transparent' ? ' checked="checked"' : '').' />transparent(png only)</label>  ',
+                'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-transparent', 'transparent',$field_value, 'transparent(png only)'),
+                'helps' => 'If you fill the checkbox, This setting takes priority.',
+                'value' => 'transparent',
+                'label' => '',
+            );
+
+        }else{
+            $form_fields['resize-for-discover-transparent'] = array('input' => 'hidden', 'value' => '');
+        }
 
         return $form_fields;
     }
 
     function add_attachment_overwrite_field( $form_fields, $post ) {
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-overwrite', true );
-        $saveColor = $this->getInitialColor();
 
         $form_fields['resize-for-discover-overwrite'] = array(
             'input' => 'html',
@@ -282,15 +291,14 @@ class resizeForDiscoverSettingsPage
 	}
 
 	function add_menu() {
-        add_options_page( 'ResizeForDiscoverSettings', 'ResizeForDiscoverSettings', 'manage_options', self::SLUG, array( $this, 'create_page' ) );
+        add_options_page( 'Resize For Discover Settings', 'Resize For Discover Settings', 'manage_options', self::SLUG, array( $this, 'create_page' ) );
 
 	}
 
 	function create_page() {
 		?>
 		<div class="wrap">
-			<h1><?php _e("ResizeForDiscoverSettings", self::LANG); ?></h1>
-			<?php // settings_errors(); // 設定ページの場合は不要 ?>
+			<h1><?php _e("Resize For Discover Settings", self::LANG); ?></h1>
 			<?php $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'tab-page1'; ?>
 			<h2 class="nav-tab-wrapper">
 				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page1" class="nav-tab <?php echo $active_tab == 'tab-page1' ? 'nav-tab-active' : ''; ?>"><?php _e("Initial setting", self::LANG); ?></a>
@@ -329,8 +337,16 @@ class resizeForDiscoverSettingsPage
 		if ( isset( $input['field1'] ) ){
             $output['field1']['resize-for-discover-background'] = $input['field1']['resize-for-discover-background'];
 
+            $output['field1']['resize-for-discover-transparent'] = 
+            empty($input['field1']['resize-for-discover-transparent'])
+            ? '' : $input['field1']['resize-for-discover-transparent'];
+
             $output['field1']['resize-for-discover-overwrite'] = 
             empty($input['field1']['resize-for-discover-overwrite'])
+            ? 0 : 1;
+
+            $output['field1']['resize-for-discover-newsize'] = 
+            empty($input['field1']['resize-for-discover-newsize'])
             ? 0 : 1;
         }
         if ( isset( $input['field2'] ) ){
@@ -420,6 +436,18 @@ class resizeForDiscoverSettingsPage
         <?php
     }
 
+    function checkbox_transparent($array){
+        $transparentChecked = empty($this->options)
+        || empty($this->options['field1']['resize-for-discover-transparent']) 
+        ? '' : ' checked="checked"';
+        ?>
+        <th scope="row"><label for="transparent"><?php _e('Transparent(png only)', self::LANG); ?></label></th>
+        <td>
+            <input id="transparent" type="checkbox" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-transparent]" value="transparent"<?= $transparentChecked ?>>
+        </td>
+        <?php
+    }
+
 
     function checkbox_overwrite($array){
         $overwriteChecked = empty($this->options)
@@ -434,6 +462,9 @@ class resizeForDiscoverSettingsPage
     }
 
 	function display_field1($array) {
+        $newSizeChecked = empty($this->options)
+        || empty($this->options['field1']['resize-for-discover-newsize'])
+        ? '' : ' checked="checked"';
         ?>
         <div style="margin-left: -200px;">
             <table>
@@ -441,7 +472,24 @@ class resizeForDiscoverSettingsPage
                     <?php $this->input_color($array); ?>
                 </tr>
                 <tr>
+                    <?php $this->checkbox_transparent($array); ?>
+                </tr>
+                <tr>
                     <?php $this->checkbox_overwrite($array); ?>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="new-image-size"><?php _e('Register new Image Size', self::LANG); ?></label></th>
+                    <td>
+                        <div style="margin-bottom: 1em;"><input id="new-image-size" type="checkbox" name="<?= self::OPTION ?>[field1][resize-for-discover-newsize]" value="1"<?= $newSizeChecked ?>></div>
+                        <div>
+                            <p><?php _e('Registers Below new Image Size.', self::LANG); ?></p>
+                            <p>
+                                <?php _e('1200 x 675', self::LANG); ?><br>
+                                <?php _e('1200 x 900', self::LANG); ?><br>
+                                <?php _e('1200 x 1200', self::LANG); ?>
+                            </p>
+                        </div>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -463,15 +511,12 @@ class resizeForDiscoverSettingsPage
                 <tr>
                     <?php $this->input_color($indexArray); ?>
                 </tr>
+                <tr>
+                    <?php $this->checkbox_transparent($indexArray); ?>
+                </tr>
                 <!-- <tr> If there is demand -->
                     <?php // $this->checkbox_overwrite($indexArray); ?>
                 <!-- </tr> -->
-                <tr>
-                    <th scope="row"><label for="transparent"><?php _e('transparent(png only)', self::LANG); ?></label></th>
-                    <td>
-                        <input type="checkbox" id="transparent" name="<?= self::OPTION ?>[field2][transparent]" value="transparent">
-                    </td>
-                </tr>
                 <tr>
                     <th scope="row"><label for="all-resize"><?php _e('Resize and register all post thumbnails', self::LANG); ?></label></th>
                     <td>
