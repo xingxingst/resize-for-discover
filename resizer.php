@@ -63,7 +63,7 @@ class ImageResizerForDiscover
          * 5 | closer 4:3 or 1:1
          * 6 | closer 16:9 or 4:3 or 1:1
          * 7 | fixed, to above width 1200px and height 1200px
-         * 8 | fixed, to above width 1200px and height 800px
+         * 8 | fixed, to above width 1200px and height 900px
          * 9 | fixed, to above width 1200px and height 675px
         */
         $width = $this->originalImageInfo[0];
@@ -131,8 +131,9 @@ class ImageResizerForDiscover
     }
 
     /**
-     * 指定した大きさの画像を出力する。縦横比は保ったまま必要に応じて黒帯をつける。
-     * PNG,JPEG,GIFのみ対応。
+     * Outputs the image of the specified size. 
+     * If necessary, add a black belt while maintaining the aspect ratio.
+     * PNG,JPEG,GIF only
      * @param string $path
      * @param int $width
      * @param int $height
@@ -171,8 +172,6 @@ class ImageResizerForDiscover
             throw new Exception('imagecopyresampled() failed');
         }
 
-        // header("Content-type: image/png");
-
         if(empty($this->savePath)) $this->setSavePath();
         switch ($this->originalImageInfo[2]) {
             case IMAGETYPE_GIF:
@@ -188,10 +187,6 @@ class ImageResizerForDiscover
                 imagejpeg($canvas,$this->savePath);
         }
 
-        
-        // imagejpeg($canvas,$this->savePath);
-
-        //メモリ開放処理
         imagedestroy($canvas);
         imagedestroy($this->originalImageInfo['resource']);
     }
@@ -246,9 +241,9 @@ class ImageResizerForDiscover
     }
 
     /**
-     * pathから画像リソースを生成しかえす。
+     * Generate an image resource from path.
      * @param string $path
-     * @return array 画像リソース
+     * @return array an image resource
      */
     private function getOriginalImage()
     {
@@ -283,11 +278,11 @@ class ImageResizerForDiscover
     }
 
     /**
-     * 縮小した画像の座標と幅、高さを取得する
-     * @param int $targetWidth 変形後の幅
-     * @param int $targetHeight 変形後の高さ
-     * @param int $currentWidth 今の幅
-     * @param int $currentHeight 今の高さ
+     * Get the coordinates, width, and height of the reduced image
+     * @param int $targetWidth width after transform
+     * @param int $targetHeight height after transform
+     * @param int $currentWidth  now width
+     * @param int $currentHeight now height
      * @return array
      */
     private function calculateShrunkenParams($targetWidth, $targetHeight, $currentWidth, $currentHeight)
