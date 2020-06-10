@@ -6,7 +6,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/resize-for-"
 "discover\n"
 "POT-Creation-Date: 2020-06-10 17:23+0900\n"
-"PO-Revision-Date: 2020-06-10 17:28+0900\n"
+"PO-Revision-Date: 2020-06-10 17:53+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ja_JP\n"
@@ -26,57 +26,58 @@ msgstr ""
 
 #: Resize-for-discover.php:46
 msgid "closer 16:9 or 4:3"
-msgstr ""
+msgstr "16:9か4:3の近い方"
 
 #: Resize-for-discover.php:47
 msgid "closer 16:9 or 1:1"
-msgstr ""
+msgstr "16:9か1:1の近い方"
 
 #: Resize-for-discover.php:48
 msgid "closer 4:3 or 1:1"
-msgstr ""
+msgstr "4:3か1:1の近い方"
 
 #: Resize-for-discover.php:49
 msgid "closer 16:9 or 4:3 or 1:1"
-msgstr ""
+msgstr "16:9,4:3,1:1で近い方"
 
 #: Resize-for-discover.php:50
 msgid "fixed, to >=1200 x >=1200"
-msgstr ""
+msgstr "固定, >=1200 x >=1200"
 
 #: Resize-for-discover.php:51
 msgid "fixed, to >=1200 x >=900"
-msgstr ""
+msgstr "固定, >=1200 x >=900"
 
 #: Resize-for-discover.php:52
 msgid "fixed, to >=1200 x >=675"
-msgstr ""
+msgstr "固定, >=1200 x >=675"
 
 #: Resize-for-discover.php:170
 msgid "Background color for resize"
-msgstr ""
+msgstr "リサイズ時の背景色"
 
 #: Resize-for-discover.php:197
 msgid "If you fill the checkbox, This setting takes priority."
-msgstr ""
+msgstr "チェックした場合、透過が優先されます。"
 
 #: Resize-for-discover.php:216 Resize-for-discover.php:472
 msgid "Overwrite"
-msgstr ""
+msgstr "上書き"
 
 #: Resize-for-discover.php:235
 msgid "Raito"
-msgstr ""
+msgstr "比率"
 
 #: Resize-for-discover.php:237
 msgid ""
 "If this width is shorter than 1200px or pixel is smaller than 800000 pixel,"
 "the picture will be resized to this conditions."
 msgstr ""
+"横1200px以下ピクセル数8万pixelの場合、これを満たすようにリサイズされます。"
 
 #: Resize-for-discover.php:245
 msgid "select"
-msgstr ""
+msgstr "選択してください"
 
 #: Resize-for-discover.php:320
 msgid "Resize For Discover Settings"
@@ -84,23 +85,23 @@ msgstr ""
 
 #: Resize-for-discover.php:323 Resize-for-discover.php:342
 msgid "Initial setting"
-msgstr ""
+msgstr "初期設定"
 
 #: Resize-for-discover.php:324
 msgid "Resize post thumbnails"
-msgstr ""
+msgstr "投稿ページのアイキャッチをリサイズ"
 
 #: Resize-for-discover.php:346
 msgid "Resize and register all post thumbail"
-msgstr ""
+msgstr "投稿ページアイキャッチをリサイズ"
 
 #: Resize-for-discover.php:442
 msgid "Letter box color"
-msgstr ""
+msgstr "レターボックスの色"
 
 #: Resize-for-discover.php:459
 msgid "Transparent(png only)"
-msgstr ""
+msgstr "透過(pngのみ)"
 
 #: Resize-for-discover.php:496
 msgid "Register new Image Size"
@@ -108,7 +109,7 @@ msgstr ""
 
 #: Resize-for-discover.php:500
 msgid "Registers Below new Image Size."
-msgstr ""
+msgstr "以下の画像サイズを新しく登録します。"
 
 #: Resize-for-discover.php:502
 msgid "1200 x 675"
@@ -124,15 +125,15 @@ msgstr ""
 
 #: Resize-for-discover.php:518
 msgid "Resize images that are less than 1200px wide or less than 800000px."
-msgstr ""
+msgstr "横1200px,ピクセル数8万以下の場合アイキャッチをリサイズします。"
 
 #: Resize-for-discover.php:521
 msgid "ratio"
-msgstr ""
+msgstr "比率"
 
 #: Resize-for-discover.php:536
 msgid "Resize and register all post thumbnails"
-msgstr ""
+msgstr "すべての投稿ページアイキャッチをリサイズする"
 
 #: Resize-for-discover.php:542
 msgid "Post ID"
@@ -142,3 +143,5 @@ msgstr ""
 msgid ""
 "Input post IDs with thumbnail you want to resize, <br> separated by commas."
 msgstr ""
+"リサイズしたいアイキャッチ画像が登録されている投稿ページのIDを <br> 「,(カン"
+"マ)」区切りで入力してください。"
