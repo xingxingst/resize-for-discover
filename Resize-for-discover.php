@@ -3,8 +3,8 @@
   Plugin Name: Resize for discover
   Plugin URI:
   Description: You can resize images for google discover and AMP⚡ by using this wp plugin.
-  Text Domain: ja
-　Domain Path: /languages/
+  Text Domain: resize-for-discover
+  Domain Path: /languages/
   Version: 0.0.1
   Author:  xingxingst
   Author URI: 
@@ -13,31 +13,44 @@
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
- }
-require_once __DIR__. '/resizer.php';
-require_once ABSPATH . 'wp-admin/includes/image.php'; 
-
+}
 
 class resizeForDiscover{
 
-    const RATIOS = [
-        '1:1', '4:3', '16:9',
-        'closer 16:9 or 4:3',
-        'closer 16:9 or 1:1',
-        'closer 4:3 or 1:1',
-        'closer 16:9 or 4:3 or 1:1',
-        'fixed, to >=1200 x >=1200',
-        'fixed, to >=1200 x >=900',
-        'fixed, to >=1200 x >=675',
-    ];
+    const NAME = 'resize-for-discover';
+    // const RATIOS = [
+    //     '1:1', '4:3', '16:9',
+    //     'closer 16:9 or 4:3',
+    //     'closer 16:9 or 1:1',
+    //     'closer 4:3 or 1:1',
+    //     'closer 16:9 or 4:3 or 1:1',
+    //     'fixed, to >=1200 x >=1200',
+    //     'fixed, to >=1200 x >=900',
+    //     'fixed, to >=1200 x >=675',
+    // ];
 
     const INITIALCOLOR = '#000000';
 
     public function __construct(){
+        require_once(  __DIR__. '/resizer.php' );
+        require_once(ABSPATH . 'wp-admin/includes/image.php'); 
+        add_action( 'plugins_loaded', array( $this, 'load_lang_strings' ) );
         add_action( 'admin_print_footer_scripts', array( $this, 'wpColorPickerScript' ));
         add_action( 'after_setup_theme',    array( $this, 'addFeaturedImageSupport' ), 11 );
         add_action( 'after_setup_theme',    array( $this, 'add_image_sizes' ), 12 );
+    }
 
+    public static function ratios(){
+        return [
+            '1:1', '4:3', '16:9',
+            __('closer 16:9 or 4:3',self::NAME),
+            __('closer 16:9 or 1:1',self::NAME),
+            __('closer 4:3 or 1:1',self::NAME),
+            __('closer 16:9 or 4:3 or 1:1',self::NAME),
+            __('fixed, to >=1200 x >=1200',self::NAME),
+            __('fixed, to >=1200 x >=900',self::NAME),
+            __('fixed, to >=1200 x >=675',self::NAME),
+        ];
     }
     
     public static function registerImage($attachment_id, $imagepath){
@@ -95,6 +108,10 @@ class resizeForDiscover{
         add_image_size( 'resize_for_discover_rect', $width, $width, true );
     
     }
+
+    public function load_lang_strings(){
+        load_plugin_textdomain( self::NAME, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
+    }
 }
 
 
@@ -150,7 +167,7 @@ class resizeForDiscoverAttachmentPage{
         $form_fields['resize-for-discover-background'] = array(
             'input' => 'text',
             'value' => $transparentBool ? '' : $field_value,
-            'label' => __( 'Background color for resize' ),
+            'label' => __( 'Background color for resize',resizeForDiscover::NAME),
         );
 
         ob_start();
@@ -177,7 +194,7 @@ class resizeForDiscoverAttachmentPage{
                 // 'html' => '<label for="attachments-discover-transparent-'.$post->ID.'"> '.
                 //     '<input type="checkbox" id="attachments-discover-transparent-'.$post->ID.'" name="attachments['.$post->ID.'][resize-for-discover-transparent]" value="transparent"'.($field_value=='transparent' ? ' checked="checked"' : '').' />transparent(png only)</label>  ',
                 'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-transparent', 'transparent',$field_value, 'transparent(png only)'),
-                'helps' => 'If you fill the checkbox, This setting takes priority.',
+                'helps' => __('If you fill the checkbox, This setting takes priority.',resizeForDiscover::NAME),
                 'value' => 'transparent',
                 'label' => '',
             );
@@ -196,7 +213,7 @@ class resizeForDiscoverAttachmentPage{
             'input' => 'html',
             'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-overwrite', 1, $field_value, ''),
             'value' => 'transparent',
-            'label' => 'Overwrite?',
+            'label' => __('Overwrite',resizeForDiscover::NAME),
         );
         return $form_fields;
     }
@@ -215,19 +232,21 @@ class resizeForDiscoverAttachmentPage{
         $field_value = get_post_meta( $post->ID, 'resize-for-discover', true );
         $form_fields['resize-for-discover'] = array(
             'input' => 'html',
-            'label' => __( 'Raito' ),
-            'helps' => __( 'If this width is shorter than 1200px or pixel is smaller than 800000 pixel, the picture will be resized to this conditions.')
+            'label' => __( 'Raito', resizeForDiscover::NAME),
+            'helps' => 
+            __( 'If this width is shorter than 1200px or pixel is smaller than 800000 pixel,the picture will be resized to this conditions.',
+            resizeForDiscover::NAME)
         );
 
         $form_fields['resize-for-discover']['html']
         = "<select name='attachments[{$post->ID}][resize-for-discover]' id='attachments[{$post->ID}][resize-for-discover]'>\n";
         $field_value = $field_value === "" ? '-1' : $field_value; 
         $form_fields['resize-for-discover']['html']
-        .="<option value='-1'>".__('select')."</option>\n";
+        .="<option value='-1'>".__('select', resizeForDiscover::NAME)."</option>\n";
         
-        foreach(resizeForDiscover::RATIOS as $key => $value){
+        foreach(resizeForDiscover::ratios() as $key => $value){
             $selected = (int)$field_value === $key ? 'selected' : '';
-            $text = __($value);
+            $text = $value;
             $form_fields['resize-for-discover']['html'] .= "<option value='{$key}' {$selected}>{$text}</option>\n";
         }
 
@@ -282,12 +301,10 @@ class resizeForDiscoverAttachmentPage{
 class resizeForDiscoverSettingsPage
 {
     private $options;
-    const LANG = 'lang';
     const SLUG = 'resize-thumbnail-discover-settings';
     const OPTION = 'resize_thumbnail_discover_options';
 
 	public function __construct() {
-        add_action( 'plugins_loaded', array( $this, 'load_lang_strings' ) );
 		add_action( 'admin_menu',  array( $this, 'add_menu' ) );
         add_action( 'admin_init',  array( $this, 'init_page' ) );
 	}
@@ -300,11 +317,11 @@ class resizeForDiscoverSettingsPage
 	function create_page() {
 		?>
 		<div class="wrap">
-			<h1><?php _e("Resize For Discover Settings", self::LANG); ?></h1>
+			<h1><?php _e("Resize For Discover Settings", resizeForDiscover::NAME); ?></h1>
 			<?php $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'tab-page1'; ?>
 			<h2 class="nav-tab-wrapper">
-				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page1" class="nav-tab <?php echo $active_tab == 'tab-page1' ? 'nav-tab-active' : ''; ?>"><?php _e("Initial setting", self::LANG); ?></a>
-				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page2" class="nav-tab <?php echo $active_tab == 'tab-page2' ? 'nav-tab-active' : ''; ?>"><?php _e("Resize post thumbnails", self::LANG); ?></a>
+				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page1" class="nav-tab <?php echo $active_tab == 'tab-page1' ? 'nav-tab-active' : ''; ?>"><?php _e("Initial setting", resizeForDiscover::NAME); ?></a>
+				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page2" class="nav-tab <?php echo $active_tab == 'tab-page2' ? 'nav-tab-active' : ''; ?>"><?php _e("Resize post thumbnails", resizeForDiscover::NAME); ?></a>
 			</h2>
 			<form method="post" action="options.php">
 			<?php
@@ -322,11 +339,11 @@ class resizeForDiscoverSettingsPage
 		$active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'tab-page1';
 		switch ( $active_tab ){
 			case 'tab-page1':
-				add_settings_section( 'resize_for_discover_section1', __("Initial setting", self::LANG), '__return_false', self::SLUG);
+				add_settings_section( 'resize_for_discover_section1', __("Initial setting", resizeForDiscover::NAME), '__return_false', self::SLUG);
 				add_settings_field( 'field1', '', array( $this, 'display_field1' ), self::SLUG, 'resize_for_discover_section1' , array('field'=>'field1'));
 				break;
 			case 'tab-page2':
-				add_settings_section( 'resize_for_discover_section2',  __('Resize and register all post thumbail', self::LANG), '__return_false', self::SLUG );
+				add_settings_section( 'resize_for_discover_section2',  __('Resize and register all post thumbail', resizeForDiscover::NAME), '__return_false', self::SLUG );
 				add_settings_field( 'field2', '', array( $this, 'display_field2' ), self::SLUG, 'resize_for_discover_section2' );
 				break;
 		}
@@ -397,20 +414,16 @@ class resizeForDiscoverSettingsPage
 
         }
     }
-    
-    public function load_lang_strings(){
-        load_plugin_textdomain( self::LANG, false, basename( dirname( __FILE__ ) ) . '/languages' );
-    }
 
     function ratioListSelect($name,$checkedRatio=0){
         ?>
         <select name="<?= $name ?>" >
             <?php 
-                foreach (resizeForDiscover::RATIOS as $val => $txt) {
+                foreach (resizeForDiscover::ratios() as $val => $txt) {
             ?>
                 <option value="<?=$val?>"
                 <?= $checkedRatio == $val ? 'selected' : '' ?>>
-                <?php  _e($txt, self::LANG); ?>
+                <?=$txt?>
             </label>
             <?php
             }
@@ -426,7 +439,7 @@ class resizeForDiscoverSettingsPage
         ? resizeForDiscover::INITIALCOLOR
         : $this->options['field1']['resize-for-discover-background'];
         ?>
-        <th scope="row"><?php _e('Letter box color', self::LANG); ?></th>
+        <th scope="row"><?php _e('Letter box color', resizeForDiscover::NAME); ?></th>
         <td>
             <input type="text" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-background]" value="<?= $color ?>"> 
         </td>
@@ -443,7 +456,7 @@ class resizeForDiscoverSettingsPage
         || empty($this->options['field1']['resize-for-discover-transparent']) 
         ? '' : ' checked="checked"';
         ?>
-        <th scope="row"><label for="transparent"><?php _e('Transparent(png only)', self::LANG); ?></label></th>
+        <th scope="row"><label for="transparent"><?php _e('Transparent(png only)', resizeForDiscover::NAME); ?></label></th>
         <td>
             <input id="transparent" type="checkbox" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-transparent]" value="transparent"<?= $transparentChecked ?>>
         </td>
@@ -456,7 +469,7 @@ class resizeForDiscoverSettingsPage
         || empty($this->options['field1']['resize-for-discover-overwrite'])
         ? '' : ' checked="checked"';
         ?>
-        <th scope="row"><label for="overwrite"><?php _e('Overwrite', self::LANG); ?></label></th>
+        <th scope="row"><label for="overwrite"><?php _e('Overwrite', resizeForDiscover::NAME); ?></label></th>
         <td>
             <input id="overwrite" type="checkbox" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-overwrite]" value="1"<?= $overwriteChecked ?>>
         </td>
@@ -480,15 +493,15 @@ class resizeForDiscoverSettingsPage
                     <?php $this->checkbox_overwrite($array); ?>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="new-image-size"><?php _e('Register new Image Size', self::LANG); ?></label></th>
+                    <th scope="row"><label for="new-image-size"><?php _e('Register new Image Size', resizeForDiscover::NAME); ?></label></th>
                     <td>
                         <div style="margin-bottom: 1em;"><input id="new-image-size" type="checkbox" name="<?= self::OPTION ?>[field1][resize-for-discover-newsize]" value="1"<?= $newSizeChecked ?>></div>
                         <div>
-                            <p><?php _e('Registers Below new Image Size.', self::LANG); ?></p>
+                            <p><?php _e('Registers Below new Image Size.', resizeForDiscover::NAME); ?></p>
                             <p>
-                                <?php _e('1200 x 675', self::LANG); ?><br>
-                                <?php _e('1200 x 900', self::LANG); ?><br>
-                                <?php _e('1200 x 1200', self::LANG); ?>
+                                <?php _e('1200 x 675', resizeForDiscover::NAME); ?><br>
+                                <?php _e('1200 x 900', resizeForDiscover::NAME); ?><br>
+                                <?php _e('1200 x 1200', resizeForDiscover::NAME); ?>
                             </p>
                         </div>
                     </td>
@@ -502,10 +515,10 @@ class resizeForDiscoverSettingsPage
         $indexArray = ['field'=>'field2'];
 		?>
         <div style="margin-left: -200px;">
-            <p><?php _e("Resize images that are less than 1200px wide or less than 800000px.", self::LANG); ?>
+            <p><?php _e("Resize images that are less than 1200px wide or less than 800000px.", resizeForDiscover::NAME); ?>
             <table>
                 <tr>
-                    <th scope="row"><?php _e('ratio', self::LANG); ?></th>
+                    <th scope="row"><?php _e('ratio', resizeForDiscover::NAME); ?></th>
                     <td>
                         <?php $this->ratioListSelect(self::OPTION . '[field2][ratio]'); ?>
                     </td>
@@ -520,16 +533,16 @@ class resizeForDiscoverSettingsPage
                     <?php // $this->checkbox_overwrite($indexArray); ?>
                 <!-- </tr> -->
                 <tr>
-                    <th scope="row"><label for="all-resize"><?php _e('Resize and register all post thumbnails', self::LANG); ?></label></th>
+                    <th scope="row"><label for="all-resize"><?php _e('Resize and register all post thumbnails', resizeForDiscover::NAME); ?></label></th>
                     <td>
                         <input type="checkbox" id="all-resize" name="<?= self::OPTION ?>[field2][all]" value="1">
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="resize-post-id"><?php _e("Post ID", self::LANG); ?></label></th>
+                    <th scope="row"><label for="resize-post-id"><?php _e("Post ID", resizeForDiscover::NAME); ?></label></th>
                     <td>
                         <input type="text" pattern="^[0-9,]+$" id="resize-post-id" name="<?= self::OPTION ?>[field2][ids]"><br>
-                        <p><?php _e("Input post IDs with thumbnail you want to resize, <br> separated by commas.", self::LANG); ?></p>
+                        <p><?php _e("Input post IDs with thumbnail you want to resize, <br> separated by commas.", resizeForDiscover::NAME); ?></p>
                     </td>
                 </tr>
             </table>
