@@ -24,8 +24,7 @@ class resizeForDiscover{
         require_once(  __DIR__. '/resizer.php' );
         require_once(ABSPATH . 'wp-admin/includes/image.php'); 
         add_action( 'plugins_loaded', array( $this, 'load_lang_strings' ) );
-        add_action( 'admin_print_footer_scripts-upload.php', array( $this, 'wpColorPickerScript' ));
-        add_action( 'admin_print_footer_scripts-options-general.php', array( $this, 'wpColorPickerScript' ));
+        add_action( 'admin_print_footer_scripts', array( $this, 'wpColorPickerScript' ));
         add_action( 'after_setup_theme', array( $this, 'addFeaturedImageSupport' ), 11 );
         add_action( 'after_setup_theme', array( $this, 'add_image_sizes' ), 12 );
     }
@@ -74,7 +73,7 @@ class resizeForDiscover{
         return dirname($path) . '/' . basename($path);
     }
 
-    public function wpColorPickerScript($hook){
+    public function wpColorPickerScript(){
         wp_enqueue_script( 'wp-color-picker' );
         wp_enqueue_style( 'wp-color-picker' );
     }
@@ -121,7 +120,7 @@ class resizeForDiscoverAttachmentPage{
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
         // add_filter( 'attachment_fields_to_save',array( $this, 'save' ), 10, 2 );
         add_action( 'edit_attachment', array( $this, 'save_attachment_resize' )  );
-        add_action( 'admin_print_footer_scripts-upload.php', array( $this, 'resizeBackgroundColorScript' ));
+        add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ));
 
     }
 
@@ -393,6 +392,7 @@ class resizeForDiscoverSettingsPage
     private function resizeAndInsertThumbFromID($mode, $postIDs, $color, $transparent){
         $resizedImage=[];
         $error = '';
+        $updateFlg = false;
         foreach ($postIDs as $id) {
             $thumbID = get_post_thumbnail_id($id);
             if(!$thumbID){
@@ -417,6 +417,9 @@ class resizeForDiscoverSettingsPage
                         set_post_thumbnail( $id, $attach_id );
                         $resizedImage[$thumbID] = true;
                     }
+                    $updateFlg = true;
+                }else{
+                    $error .= 'Post ID '. $id .__("'s eyecactch is not resized. Because This image is too big.<br>\n");
                 }
             } catch (Exception $th) {
                 $errorString = $th->getMessage();
@@ -426,7 +429,8 @@ class resizeForDiscoverSettingsPage
 
         }
         if(!empty($error)){
-            add_settings_error( self::SLUG, 'message', $error);
+            $type = $updateFlg ? 'updated' : 'error';
+            add_settings_error( self::SLUG, 'message', $error, $type);
         }
     }
 
