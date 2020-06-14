@@ -18,26 +18,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class resizeForDiscover{
 
     const NAME = 'resize-for-discover';
-    // const RATIOS = [
-    //     '1:1', '4:3', '16:9',
-    //     'closer 16:9 or 4:3',
-    //     'closer 16:9 or 1:1',
-    //     'closer 4:3 or 1:1',
-    //     'closer 16:9 or 4:3 or 1:1',
-    //     'fixed, to >=1200 x >=1200',
-    //     'fixed, to >=1200 x >=900',
-    //     'fixed, to >=1200 x >=675',
-    // ];
-
     const INITIALCOLOR = '#000000';
 
     public function __construct(){
         require_once(  __DIR__. '/resizer.php' );
         require_once(ABSPATH . 'wp-admin/includes/image.php'); 
         add_action( 'plugins_loaded', array( $this, 'load_lang_strings' ) );
-        add_action( 'admin_print_footer_scripts', array( $this, 'wpColorPickerScript' ));
-        add_action( 'after_setup_theme',    array( $this, 'addFeaturedImageSupport' ), 11 );
-        add_action( 'after_setup_theme',    array( $this, 'add_image_sizes' ), 12 );
+        add_action( 'admin_print_footer_scripts-upload.php', array( $this, 'wpColorPickerScript' ));
+        add_action( 'admin_print_footer_scripts-options-general.php', array( $this, 'wpColorPickerScript' ));
+        add_action( 'after_setup_theme', array( $this, 'addFeaturedImageSupport' ), 11 );
+        add_action( 'after_setup_theme', array( $this, 'add_image_sizes' ), 12 );
     }
 
     public static function ratios(){
@@ -74,10 +64,17 @@ class resizeForDiscover{
         return $attach_id;
     }
 
+    /**
+     * remove backslash etc.
+     *
+     * @param [string] $path
+     * @return string
+     */
+    public static function toWPlocalPath($path){
+        return dirname($path) . '/' . basename($path);
+    }
+
     public function wpColorPickerScript($hook){
-        // if ( 'upload.php' != $hook && 'options-general.php' != $hook) {
-        //     return;
-        // }
         wp_enqueue_script( 'wp-color-picker' );
         wp_enqueue_style( 'wp-color-picker' );
     }
@@ -122,8 +119,9 @@ class resizeForDiscoverAttachmentPage{
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_color_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_overwrite_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
+        // add_filter( 'attachment_fields_to_save',array( $this, 'save' ), 10, 2 );
         add_action( 'edit_attachment', array( $this, 'save_attachment_resize' )  );
-        add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ));
+        add_action( 'admin_print_footer_scripts-upload.php', array( $this, 'resizeBackgroundColorScript' ));
 
     }
 
@@ -151,7 +149,7 @@ class resizeForDiscoverAttachmentPage{
         <?php
     }
 
-    function getInitialColor(){
+    private function getInitialColor(){
         $saveColor = get_option( resizeForDiscoverSettingsPage::OPTION );
 
         return empty($saveColor['field1']['resize-for-discover-background'])
@@ -173,9 +171,7 @@ class resizeForDiscoverAttachmentPage{
         ob_start();
         ?>
         <script>
-
          jQuery('[name$="[resize-for-discover-background]"]').myColorPicker();
-
         </script>
         <?php
         $text_color_js = ob_get_clean();
@@ -191,8 +187,6 @@ class resizeForDiscoverAttachmentPage{
             $form_fields['resize-for-discover-transparent'] = 
             array(
                 'input' => 'html',
-                // 'html' => '<label for="attachments-discover-transparent-'.$post->ID.'"> '.
-                //     '<input type="checkbox" id="attachments-discover-transparent-'.$post->ID.'" name="attachments['.$post->ID.'][resize-for-discover-transparent]" value="transparent"'.($field_value=='transparent' ? ' checked="checked"' : '').' />transparent(png only)</label>  ',
                 'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-transparent', 'transparent',$field_value, 'transparent(png only)'),
                 'helps' => __('If you fill the checkbox, This setting takes priority.',resizeForDiscover::NAME),
                 'value' => 'transparent',
@@ -218,7 +212,7 @@ class resizeForDiscoverAttachmentPage{
         return $form_fields;
     }
 
-    function fieldCheckboxHTML( $postID, $index, $value, $field_value, $text) {
+    private function fieldCheckboxHTML( $postID, $index, $value, $field_value, $text) {
         $label = $index .'-'. $postID;
         $checked =  $field_value== $value ? " checked='checked'" : '';
         return "<label for='{$label}'>
@@ -281,6 +275,7 @@ class resizeForDiscoverAttachmentPage{
                 $saveResult = $resizeIns ->resizeForDiscover($mode, true);
                 if($saveResult){
                     $imagepath = $resizeIns->getSavePath();
+                    $imagepath = resizeForDiscover::toWPlocalPath($imagepath);
                     if(!$overwrite) {
                         update_post_meta( $attachment_id, 'resize-for-discover', -1 );
                         $attachment_id = resizeForDiscover::insertAttachment($imagepath);
@@ -294,6 +289,13 @@ class resizeForDiscoverAttachmentPage{
             }
         }
     }
+
+
+    // function save($post, $attachment){
+    //     $post['tto'] = 'saves';
+    //     $post['errors']['resize-for-discover-transparent']['errors'][] = __('Empty Title filled from filename.');
+    //     return $post;
+    // }
 }
 
 
@@ -310,8 +312,7 @@ class resizeForDiscoverSettingsPage
 	}
 
 	function add_menu() {
-        add_options_page( 'Resize For Discover Settings', 'Resize For Discover Settings', 'manage_options', self::SLUG, array( $this, 'create_page' ) );
-
+        add_options_page( 'Resize For Discover Settings', 'Resize For Discover', 'manage_options', self::SLUG, array( $this, 'create_page' ) );
 	}
 
 	function create_page() {
@@ -369,8 +370,10 @@ class resizeForDiscoverSettingsPage
             ? 0 : 1;
         }
         if ( isset( $input['field2'] ) ){
-            if(isset( $input['field2']['all']) && !empty($input['field2']['ids']) )
+            if(isset( $input['field2']['all']) === !empty($input['field2']['ids'])){
+                add_settings_error( self::SLUG, 'message', __('Either check all resize or Input Post IDs.'));
                 return $output;
+            }
             
             $postIDs = isset($input['field2']['all']) ? array_column(get_posts(), 'ID') :
             explode(",", sanitize_text_field($input['field2']['ids'])) ;
@@ -387,20 +390,27 @@ class resizeForDiscoverSettingsPage
 		return $output;
     }
 
-    function resizeAndInsertThumbFromID($mode, $postIDs, $color, $transparent){
+    private function resizeAndInsertThumbFromID($mode, $postIDs, $color, $transparent){
         $resizedImage=[];
+        $error = '';
         foreach ($postIDs as $id) {
             $thumbID = get_post_thumbnail_id($id);
-            if(!$thumbID or isset($resizedImage[$thumbID])) continue; //same image isn't resized.
+            if(!$thumbID){
+                $error .= 'Post ID ' . $id . __(' does not have eyecatch or does not exist.') . "<br>\n";
+                continue;
+            }
+            if(isset($resizedImage[$thumbID])) continue; //same image isn't resized.
             $imagepath= get_attached_file($thumbID);
             $type = wp_check_filetype($imagepath);
             $applyColor = $transparent && $type['ext'] === 'png'
             ? $transparent : $color;
             $resizeIns = new ImageResizerForDiscover($imagepath, false, $applyColor);
             try {
+                // throw new Exception('exception'); //for messege check
                 $saveResult = $resizeIns ->resizeForDiscover((int)$mode);
                 if($saveResult){
                     $imagepath = $resizeIns->getSavePath();
+                    $imagepath = resizeForDiscover::toWPlocalPath($imagepath);
                     $attach_id = resizeForDiscover::insertAttachment($imagepath, $id);
                     if($attach_id) {
                         resizeForDiscover::registerImage($attach_id, $imagepath);
@@ -409,13 +419,18 @@ class resizeForDiscoverSettingsPage
                     }
                 }
             } catch (Exception $th) {
-                error_log(print_r($th->getMessage(),true));
+                $errorString = $th->getMessage();
+                error_log(print_r($errorString,true));
+                $error .= "Post ID {$id} error:{$errorString} <br> \n";
             }
 
         }
+        if(!empty($error)){
+            add_settings_error( self::SLUG, 'message', $error);
+        }
     }
 
-    function ratioListSelect($name,$checkedRatio=0){
+    private function ratioListSelect($name,$checkedRatio=0){
         ?>
         <select name="<?= $name ?>" >
             <?php 
@@ -434,7 +449,7 @@ class resizeForDiscoverSettingsPage
 
 
 
-    function input_color($array){
+    private function input_color($array){
         $color = empty($this->options) || empty($this->options['field1']['resize-for-discover-background'])
         ? resizeForDiscover::INITIALCOLOR
         : $this->options['field1']['resize-for-discover-background'];
@@ -451,7 +466,7 @@ class resizeForDiscoverSettingsPage
         <?php
     }
 
-    function checkbox_transparent($array){
+    private function checkbox_transparent($array){
         $transparentChecked = empty($this->options)
         || empty($this->options['field1']['resize-for-discover-transparent']) 
         ? '' : ' checked="checked"';
@@ -464,7 +479,7 @@ class resizeForDiscoverSettingsPage
     }
 
 
-    function checkbox_overwrite($array){
+    private function checkbox_overwrite($array){
         $overwriteChecked = empty($this->options)
         || empty($this->options['field1']['resize-for-discover-overwrite'])
         ? '' : ' checked="checked"';
