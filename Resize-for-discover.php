@@ -170,7 +170,66 @@ class resizeForDiscoverAttachmentPage{
         ob_start();
         ?>
         <script>
-         jQuery('[name$="[resize-for-discover-background]"]').myColorPicker();
+         let existSaveWaiting = function (records){
+            // search past 'save-waiting' class
+            let len = records.length;
+            let exist = false;
+            for( let i=0; i<len; i++) {
+                if(records[i].oldValue.indexOf('save-waiting') > 0){
+                    exist = true;
+                    break;
+                }
+            }
+            return exist;
+         }
+         let mediaReload = function (records){
+            if(!existSaveWaiting(records)){return;}
+
+            // get wp outside iframe
+            var wp = parent.wp;
+
+            // switch tabs (required for the code below)
+            wp.media.frame.setState('insert');
+
+            // refresh
+            if( wp.media.frame.content.get() !== null) {
+                wp.media.frame.content.get().collection.props.set({ignore: (+ new Date())});
+                wp.media.frame.content.get().options.selection.reset();
+            } else {
+                wp.media.frame.library.props.set ({ignore: (+ new Date())});
+            }
+        };
+        jQuery(function($){
+            $('[name$="[resize-for-discover-background]"]').myColorPicker();
+
+            $('.resize-for-discover-select').change(()=>{
+                console.log(jQuery('.media-sidebar').length);
+                let reloadFlg = false;
+                let observer;
+                let modal;
+                let nowPage = location.href.indexOf('upload.php');
+                if(nowPage == -1 && $('.media-sidebar').length>0){
+                    reloadFlg = true;
+                    modal = document.getElementsByClassName('media-sidebar')[0].querySelector('.attachment-details');
+                    observer = new MutationObserver(function(records){mediaReload(records)});
+                }else if(nowPage > 0 && $('.edit-attachment-frame').length>0){
+                    reloadFlg = true;
+                    modal = document.getElementsByClassName('edit-attachment-frame')[0].querySelector('.attachment-details');
+                    observer = new MutationObserver(function(records){
+                        if(!existSaveWaiting(records)){return;}
+                        location.reload();
+                    });
+                }
+                if(reloadFlg){
+                    reloadFlg = true;
+                    observer.observe(modal, {
+                        attributes: true,
+                        attributeOldValue :true,
+                        attributeFilter: ['class']
+                    });
+                }
+            });
+        });
         </script>
         <?php
         $text_color_js = ob_get_clean();
@@ -232,7 +291,7 @@ class resizeForDiscoverAttachmentPage{
         );
 
         $form_fields['resize-for-discover']['html']
-        = "<select name='attachments[{$post->ID}][resize-for-discover]' id='attachments[{$post->ID}][resize-for-discover]' style='font-size:1.04em;'>\n";
+        = "<select class='resize-for-discover-select' name='attachments[{$post->ID}][resize-for-discover]' id='attachments[{$post->ID}][resize-for-discover]' style='font-size:1.04em;'>\n";
         $field_value = $field_value === "" ? '-1' : $field_value; 
         $form_fields['resize-for-discover']['html']
         .="<option value='-1'>".__('select', resizeForDiscover::NAME)."</option>\n";
@@ -243,7 +302,6 @@ class resizeForDiscoverAttachmentPage{
             $form_fields['resize-for-discover']['html'] .= "<option value='{$key}' {$selected}>{$text}</option>\n";
         }
 
-        $form_fields['resize-for-discover']['html'].="</select>\n";
         return $form_fields;
     }
 
