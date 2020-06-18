@@ -24,7 +24,7 @@ class resizeForDiscover{
         require_once(  __DIR__. '/resizer.php' );
         require_once(ABSPATH . 'wp-admin/includes/image.php'); 
         add_action( 'plugins_loaded', array( $this, 'load_lang_strings' ) );
-        add_action( 'admin_print_footer_scripts', array( $this, 'wpColorPickerScript' ));
+        add_action( 'admin_print_footer_scripts', array( $this, 'wpColorPickerScript' ),9);
         add_action( 'after_setup_theme', array( $this, 'addFeaturedImageSupport' ), 11 );
         add_action( 'after_setup_theme', array( $this, 'add_image_sizes' ), 12 );
     }
@@ -120,7 +120,7 @@ class resizeForDiscoverAttachmentPage{
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
         // add_filter( 'attachment_fields_to_save',array( $this, 'save' ), 10, 2 );
         add_action( 'edit_attachment', array( $this, 'save_attachment_resize' )  );
-        add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ));
+        add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ), 99999);
 
     }
 
@@ -203,7 +203,6 @@ class resizeForDiscoverAttachmentPage{
             $('[name$="[resize-for-discover-background]"]').myColorPicker();
 
             $('.resize-for-discover-select').change(()=>{
-                console.log(jQuery('.media-sidebar').length);
                 let reloadFlg = false;
                 let observer;
                 let modal;
@@ -628,14 +627,8 @@ class resizeForDiscoverSettingsPage
 	}
 }
 
-if(function_exists('add_action')){
-    // add_action('plugins_loaded',
-    //     function(){if(is_user_logged_in()) new resizeForDiscoverAttachmentPage();}
-    // );
-    
-    if( is_admin() ) {
-        new resizeForDiscover();
-        new resizeForDiscoverAttachmentPage();
-        new resizeForDiscoverSettingsPage();
-    }
+if( is_admin() ) {
+    new resizeForDiscover();
+    new resizeForDiscoverAttachmentPage();
+    new resizeForDiscoverSettingsPage();
 }

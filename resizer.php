@@ -103,9 +103,6 @@ class ImageResizerForDiscover
             unset($ratiosDiff[$mode-3]);
             $closer = min($ratiosDiff);
             $mode =  array_keys($ratiosDiff, $closer);
-            error_log(print_r($closer,true));
-            error_log(print_r($ratiosDiff,true));
-            error_log(print_r($mode,true));
             $mode = is_array($mode) ? $mode[0] : $mode;
         }
 
