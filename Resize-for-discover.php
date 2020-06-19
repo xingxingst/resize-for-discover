@@ -300,6 +300,7 @@ class resizeForDiscoverAttachmentPage{
             $text = $value;
             $form_fields['resize-for-discover']['html'] .= "<option value='{$key}' {$selected}>{$text}</option>\n";
         }
+        $form_fields['resize-for-discover']['html'].="</select>\n";
 
         return $form_fields;
     }
