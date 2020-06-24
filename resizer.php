@@ -18,7 +18,7 @@ class ImageResizerForDiscover
 
     function __construct($path, $overWrite=FALSE, $backgroundColor = "")	{
         if (!is_string($path) || !is_file($path)) {
-            throw new Exception('File not found');
+            throw new Exception('ImageResizerForDiscover Error: File not found');
         }
         $this->path = $path;
         $this->originalImageInfo = $this->getOriginalImage();
@@ -47,7 +47,7 @@ class ImageResizerForDiscover
     public function resize($width, $height)
     {
         if (is_int($width) === FALSE || is_int($height) === FALSE) {
-            throw new Exception('$width or $height is invalid');
+            throw new Exception('ImageResizerForDiscover Error: $width or $height is invalid');
         }
         $this->resizeImage($width, $height);
     }
@@ -78,7 +78,7 @@ class ImageResizerForDiscover
             $widthRaito = $this->lowestWidth / $width;
             $heightRaito = $compareHeight[$mode] / $height;
             if($widthRaito < 1 && $heightRaito < 1){
-                throw new Exception('Image is enough big.');
+                throw new Exception('ImageResizerForDiscover Error: This image is enough big.');
             }
 
             $pixelRatio = $widthRaito > $heightRaito ? $widthRaito : $heightRaito;
@@ -142,7 +142,7 @@ class ImageResizerForDiscover
 
         $canvas = imagecreatetruecolor($width, $height);
         if ($canvas === FALSE) {
-            throw new Exception('create $canvas failed');
+            throw new Exception('ImageResizerForDiscover Error: create $canvas failed');
         }
 
         if($this->backgroundColor == 'transparent'){
@@ -152,12 +152,12 @@ class ImageResizerForDiscover
             $rgb = str_split($this->backgroundColor,2);
             $color = imagecolorallocate($canvas,  hexdec($rgb[0]),  hexdec($rgb[1]),  hexdec($rgb[2]));
             if ($color === FALSE) {
-                throw new Exception('create $color failed');
+                throw new Exception('ImageResizerForDiscover Error: create $color failed');
             }
     
             $success = imagefill($canvas, 0, 0, $color);
             if ($success === FALSE) {
-                throw new Exception('imagefill() failed');
+                throw new Exception('ImageResizerForDiscover Error: imagefill() failed');
             }
         }
 
@@ -166,7 +166,7 @@ class ImageResizerForDiscover
             $shrunkenParams['width'], $shrunkenParams['height'], $this->originalImageInfo[0], $this->originalImageInfo[1]
         );
         if ($success === FALSE) {
-            throw new Exception('imagecopyresampled() failed');
+            throw new Exception('ImageResizerForDiscover Error: imagecopyresampled() failed');
         }
 
         if(empty($this->savePath)) $this->setSavePath();
@@ -248,7 +248,7 @@ class ImageResizerForDiscover
         $originalImage = FALSE;
 
         if (is_array($imageInfo) === FALSE) {
-            throw new Exception('This path is not a image.');
+            throw new Exception('ImageResizerForDiscover Error: This path is not a image.');
         }
 
         switch ($imageInfo[2]) {
@@ -262,11 +262,11 @@ class ImageResizerForDiscover
                 $originalImage = imagecreatefrompng($this->path);
                 break;
             default:
-                throw new Exception('This type is not supported.');
+                throw new Exception('ImageResizerForDiscover Error: This type is not supported.');
         }
 
         if ($originalImage === FALSE) {
-            throw new Exception('get image failed');
+            throw new Exception('ImageResizerForDiscover Error: get image failed');
         }
 
         $imageInfo['resource'] = $originalImage;

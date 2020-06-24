@@ -296,7 +296,7 @@ class resizeForDiscoverAttachmentPage{
         );
 
         $form_fields['resize-for-discover']['html']
-        = "<select class='resize-for-discover-select' name='attachments[{$post->ID}][resize-for-discover]' id='attachments[{$post->ID}][resize-for-discover]' style='font-size:1.04em;'>\n";
+        = "<select class='resize-for-discover-select' name='attachments[{$post->ID}][resize-for-discover]' id='attachments[{$post->ID}][resize-for-discover]' style='font-size:1em;'>\n";
         $field_value = $field_value === "" ? '-1' : $field_value; 
         $form_fields['resize-for-discover']['html']
         .="<option value='-1'>".__('select', resizeForDiscover::NAME)."</option>\n";
