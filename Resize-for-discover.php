@@ -180,13 +180,13 @@ class resizeForDiscoverAttachmentPage{
                     break;
                 }
             }
-            if(!exist){
-                jQuery('.resize-for-discover-spinner').addClass('save-waiting');
-            } 
             return exist;
          }
          let mediaReload = function (records){
-            if(!existSaveWaiting(records)){return;}
+            if(!existSaveWaiting(records)){
+                jQuery('.resize-for-discover-spinner').addClass('save-waiting');
+                return;
+            }
 
             // get wp outside iframe
             var wp = parent.wp;
@@ -204,8 +204,7 @@ class resizeForDiscoverAttachmentPage{
         };
         jQuery(function($){
             $('[name$="[resize-for-discover-background]"]').myColorPicker();
-            $('.settings-save-status').clone().wrap('<span class="attachment-details resize-for-discover-spinner"></span>').parent().appendTo('.compat-field-resize-for-discover td');
-            $('.resize-for-discover-select').change(()=>{
+            $('.resize-for-discover-select').change(function(){
                 let reloadFlg = false;
                 let observer;
                 let modal;
@@ -244,10 +243,14 @@ class resizeForDiscoverAttachmentPage{
         if($type['ext'] === 'png'){
             $saveTransparent = get_option( resizeForDiscoverSettingsPage::OPTION );
             $field_value = empty($saveTransparent['field1']['resize-for-discover-transparent']) && !$transparentBool ? '' :  'transparent';
-            $form_fields['resize-for-discover-transparent'] = 
-            array(
+            $form_fields['resize-for-discover-transparent'] = array(
                 'input' => 'html',
-                'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-transparent', 'transparent',$field_value, 'transparent(png only)'),
+                'html'  => $this->fieldCheckboxHTML(
+                    $post->ID,
+                    'resize-for-discover-transparent',
+                    'transparent',$field_value,
+                    'transparent(png only)'
+                ),
                 'helps' => __('If you fill the checkbox, This setting takes priority.',resizeForDiscover::NAME),
                 'value' => 'transparent',
                 'label' => '',
@@ -287,9 +290,9 @@ class resizeForDiscoverAttachmentPage{
         $form_fields['resize-for-discover'] = array(
             'input' => 'html',
             'label' => __( 'Raito', resizeForDiscover::NAME),
-            'helps' => 
-            __( 'If this width is shorter than 1200px or pixel is smaller than 800000 pixel,the picture will be resized to this conditions.',
-            resizeForDiscover::NAME)
+            // 'helps' => 
+            // __( 'If this width is shorter than 1200px or pixel is smaller than 800000 pixel,the picture will be resized to this conditions.',
+            // resizeForDiscover::NAME)
         );
 
         $form_fields['resize-for-discover']['html']
@@ -304,6 +307,17 @@ class resizeForDiscoverAttachmentPage{
             $form_fields['resize-for-discover']['html'] .= "<option value='{$key}' {$selected}>{$text}</option>\n";
         }
         $form_fields['resize-for-discover']['html'].="</select>\n";
+        $form_fields['resize-for-discover']['html'].=
+        '<p class="help">' . __( 'If this width is shorter than 1200px or pixel is smaller than 800000 pixel,the picture will be resized to this conditions.',resizeForDiscover::NAME) . '</p>';
+        $style =
+        'position: initial; overflow: initial; top: initial; bottom: initial; right: initial; left: initial; box-shadow: initial;';
+        $form_fields['resize-for-discover']['html'] .= 
+        '<span class="attachment-details resize-for-discover-spinner" style="'. $style . '">
+            <span class="settings-save-status" role="status">
+                <span class="spinner"></span>
+                <span class="saved">'.  esc_html__( 'Saved.') .'</span>
+            </span>
+        </span>';
 
         return $form_fields;
     }
@@ -349,13 +363,6 @@ class resizeForDiscoverAttachmentPage{
             }
         }
     }
-
-
-    // function save($post, $attachment){
-    //     $post['tto'] = 'saves';
-    //     $post['errors']['resize-for-discover-transparent']['errors'][] = __('Empty Title filled from filename.');
-    //     return $post;
-    // }
 }
 
 
