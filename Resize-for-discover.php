@@ -180,6 +180,9 @@ class resizeForDiscoverAttachmentPage{
                     break;
                 }
             }
+            if(!exist){
+                jQuery('.resize-for-discover-spinner').addClass('save-waiting');
+            } 
             return exist;
          }
          let mediaReload = function (records){
@@ -201,7 +204,7 @@ class resizeForDiscoverAttachmentPage{
         };
         jQuery(function($){
             $('[name$="[resize-for-discover-background]"]').myColorPicker();
-
+            $('.settings-save-status').clone().wrap('<span class="attachment-details resize-for-discover-spinner"></span>').parent().appendTo('.compat-field-resize-for-discover td');
             $('.resize-for-discover-select').change(()=>{
                 let reloadFlg = false;
                 let observer;
