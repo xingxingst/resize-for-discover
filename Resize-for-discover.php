@@ -118,7 +118,6 @@ class resizeForDiscoverAttachmentPage{
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_color_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_overwrite_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
-        // add_filter( 'attachment_fields_to_save',array( $this, 'save' ), 10, 2 );
         add_action( 'edit_attachment', array( $this, 'save_attachment_resize' )  );
         add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ), 99999);
 
@@ -204,6 +203,8 @@ class resizeForDiscoverAttachmentPage{
         };
         jQuery(function($){
             $('[name$="[resize-for-discover-background]"]').myColorPicker();
+
+            //reload attachment page 
             $('.resize-for-discover-select').change(function(){
                 let reloadFlg = false;
                 let observer;
@@ -265,7 +266,9 @@ class resizeForDiscoverAttachmentPage{
 
     function add_attachment_overwrite_field( $form_fields, $post ) {
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-overwrite', true );
-
+        $saveOverwrite = get_option( resizeForDiscoverSettingsPage::OPTION );
+        $saveOverwrite = empty($saveOverwrite['field1']['resize-for-discover-overwrite']) ? 0 :  1;
+        $field_value =  $field_value === '' ? $saveOverwrite : $field_value;
         $form_fields['resize-for-discover-overwrite'] = array(
             'input' => 'html',
             'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-overwrite', 1, $field_value, ''),
