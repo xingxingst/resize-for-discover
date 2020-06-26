@@ -158,11 +158,11 @@ class resizeForDiscoverAttachmentPage{
     function add_attachment_color_field( $form_fields, $post ) {
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-background', true );
         $saveColor = $this->getInitialColor();
-        $field_value = $field_value ? $field_value : $saveColor;
-        $transparentBool = $field_value == 'transparent';
+        $postColor = $field_value ? $field_value : $saveColor;
+        $transparentBool = $field_value === 'transparent';
         $form_fields['resize-for-discover-background'] = array(
             'input' => 'text',
-            'value' => $transparentBool ? '' : $field_value,
+            'value' => $transparentBool ? '' : $postColor,
             'label' => __( 'Background color for resize',resizeForDiscover::NAME),
         );
 
@@ -243,14 +243,17 @@ class resizeForDiscoverAttachmentPage{
 
         if($type['ext'] === 'png'){
             $saveTransparent = get_option( resizeForDiscoverSettingsPage::OPTION );
-            $field_value = empty($saveTransparent['field1']['resize-for-discover-transparent']) && !$transparentBool ? '' :  'transparent';
+            $saveTransparent = empty($saveTransparent['field1']['resize-for-discover-transparent']) ? '' :  'transparent';
+            $field_value = $field_value === '' ? $saveTransparent : $field_value;
+            $checkbox_text = __('transparent(png only)');
             $form_fields['resize-for-discover-transparent'] = array(
                 'input' => 'html',
                 'html'  => $this->fieldCheckboxHTML(
                     $post->ID,
                     'resize-for-discover-transparent',
-                    'transparent',$field_value,
-                    'transparent(png only)'
+                    'transparent',
+                    $field_value,
+                    $checkbox_text
                 ),
                 'helps' => __('If you fill the checkbox, This setting takes priority.',resizeForDiscover::NAME),
                 'value' => 'transparent',
@@ -272,7 +275,7 @@ class resizeForDiscoverAttachmentPage{
         $form_fields['resize-for-discover-overwrite'] = array(
             'input' => 'html',
             'html'  => $this->fieldCheckboxHTML($post->ID, 'resize-for-discover-overwrite', 1, $field_value, ''),
-            'value' => 'transparent',
+            // 'value' => 'transparent',
             'label' => __('Overwrite',resizeForDiscover::NAME),
         );
         return $form_fields;
