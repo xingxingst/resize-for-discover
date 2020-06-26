@@ -157,12 +157,12 @@ class resizeForDiscoverAttachmentPage{
 
     function add_attachment_color_field( $form_fields, $post ) {
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-background', true );
-        $saveColor = $this->getInitialColor();
-        $postColor = $field_value ? $field_value : $saveColor;
+        $savedColor = $this->getInitialColor();
+        $viewColor = $field_value ? $field_value : $savedColor;
         $transparentBool = $field_value === 'transparent';
         $form_fields['resize-for-discover-background'] = array(
             'input' => 'text',
-            'value' => $transparentBool ? '' : $postColor,
+            'value' => $transparentBool ? '' : $viewColor,
             'label' => __( 'Background color for resize',resizeForDiscover::NAME),
         );
 
@@ -331,10 +331,12 @@ class resizeForDiscoverAttachmentPage{
     function save_attachment_resize( $attachment_id ) {
         $color= '';
         $values = $_REQUEST['attachments'][$attachment_id];
-        if(!empty( $values['resize-for-discover-transparent'] )){
+        if(!empty($values['resize-for-discover-transparent'])){
             $color =$values['resize-for-discover-transparent'];
-        }elseif ( !empty( $values['resize-for-discover-background'] )) {
+        }elseif (!empty( $values['resize-for-discover-background'])) {
             $color = $values['resize-for-discover-background'];
+        }else{
+            $color = $this->getInitialColor();
         }
         update_post_meta( $attachment_id, 'resize-for-discover-background', $color );
 
@@ -348,7 +350,7 @@ class resizeForDiscoverAttachmentPage{
             if($mode === "-1") return;
             $imagepath = get_attached_file($attachment_id);
             $color = empty($color) ? get_post_meta($attachment_id, 'resize-for-discover-background', true ) : $color;
-            $color = empty($color) ? $this->getInitialColor() : $color ; 
+            // $color = empty($color) ? $this->getInitialColor() : $color ;
             $resizeIns = new ImageResizerForDiscover($imagepath,$overwrite, $color);
             if(!$overwrite) $resizeIns->setSuffix('-'. $mode);
             try {
