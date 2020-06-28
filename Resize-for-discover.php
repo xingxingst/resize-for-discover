@@ -63,6 +63,10 @@ class resizeForDiscover{
         return $attach_id;
     }
 
+    public static function randomString($length = 3){
+        return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyz'), 0, $length);
+    }
+
     /**
      * remove backslash etc.
      *
@@ -238,14 +242,15 @@ class resizeForDiscoverAttachmentPage{
         $form_fields['text_color_js'] = array(
             'tr' => $text_color_js, // Adds free-form stuff to table.
         );
+
         $imagepath= get_attached_file($post->ID);
         $type = wp_check_filetype($imagepath);
 
-        if($type['ext'] === 'png'){
+        //for transparent checkbox
+        if($type['ext'] === 'png' || $type['ext'] === 'gif'){
             $saveTransparent = get_option( resizeForDiscoverSettingsPage::OPTION );
             $saveTransparent = empty($saveTransparent['field1']['resize-for-discover-transparent']) ? '' :  'transparent';
             $field_value = $field_value === '' ? $saveTransparent : $field_value;
-            $checkbox_text = __('transparent(png only)');
             $form_fields['resize-for-discover-transparent'] = array(
                 'input' => 'html',
                 'html'  => $this->fieldCheckboxHTML(
@@ -253,7 +258,7 @@ class resizeForDiscoverAttachmentPage{
                     'resize-for-discover-transparent',
                     'transparent',
                     $field_value,
-                    $checkbox_text
+                    __('Transparent', resizeForDiscover::NAME)
                 ),
                 'helps' => __('If you fill the checkbox, This setting takes priority.',resizeForDiscover::NAME),
                 'value' => 'transparent',
@@ -352,7 +357,10 @@ class resizeForDiscoverAttachmentPage{
             $color = empty($color) ? get_post_meta($attachment_id, 'resize-for-discover-background', true ) : $color;
             // $color = empty($color) ? $this->getInitialColor() : $color ;
             $resizeIns = new ImageResizerForDiscover($imagepath,$overwrite, $color);
-            if(!$overwrite) $resizeIns->setSuffix('-'. $mode);
+
+            if(!$overwrite) 
+                $resizeIns->setSuffix('-'. resizeForDiscover::randomString() . '-' . $mode);
+
             try {
                 $saveResult = $resizeIns ->resizeForDiscover($mode, true);
                 if($saveResult){
@@ -551,7 +559,7 @@ class resizeForDiscoverSettingsPage
         || empty($this->options['field1']['resize-for-discover-transparent']) 
         ? '' : ' checked="checked"';
         ?>
-        <th scope="row"><label for="transparent"><?php _e('Transparent(png only)', resizeForDiscover::NAME); ?></label></th>
+        <th scope="row"><label for="transparent"><?php _e('Transparent', resizeForDiscover::NAME); ?></label></th>
         <td>
             <input id="transparent" type="checkbox" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-transparent]" value="transparent"<?= $transparentChecked ?>>
         </td>

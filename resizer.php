@@ -131,7 +131,6 @@ class ImageResizerForDiscover
      * Outputs the image of the specified size. 
      * If necessary, add a black belt while maintaining the aspect ratio.
      * PNG,JPEG,GIF only
-     * @param string $path
      * @param int $width
      * @param int $height
      */
@@ -146,19 +145,28 @@ class ImageResizerForDiscover
         }
 
         if($this->backgroundColor == 'transparent'){
-            imagealphablending($canvas, false);
-            imagesavealpha($canvas, true);
+            if($this->originalImageInfo[2] === IMAGETYPE_PNG){
+                imagealphablending($canvas, false);
+                imagesavealpha($canvas, true);
+                $color = 0x7fff0000;
+                $success = imagefill($canvas, 0, 0, $color);
+            }else{
+                $color = imagecolorallocate($canvas,  0,  0,  0);
+                imagecolortransparent($canvas, $color);
+                $success = TRUE;
+            }
         }else{
             $rgb = str_split($this->backgroundColor,2);
             $color = imagecolorallocate($canvas,  hexdec($rgb[0]),  hexdec($rgb[1]),  hexdec($rgb[2]));
-            if ($color === FALSE) {
-                throw new Exception('ImageResizerForDiscover Error: create $color failed');
-            }
-    
             $success = imagefill($canvas, 0, 0, $color);
-            if ($success === FALSE) {
-                throw new Exception('ImageResizerForDiscover Error: imagefill() failed');
-            }
+        }
+
+        if ($color === FALSE) {
+            throw new Exception('ImageResizerForDiscover Error: create $color failed');
+        }
+
+        if ($success === FALSE) {
+            throw new Exception('ImageResizerForDiscover Error: imagefill() failed');
         }
 
         $success = imagecopyresampled(
