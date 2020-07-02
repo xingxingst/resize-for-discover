@@ -159,7 +159,22 @@ class resizeForDiscoverAttachmentPage{
         : $saveColor['field1']['resize-for-discover-background'];
     }
 
+    private function getFileType($post){
+        $imagepath= get_attached_file($post->ID);
+        $type = wp_check_filetype($imagepath);
+
+        return $type['ext'];
+    }
+
+
+    private function isImage($type){
+        return $type === 'png' || $type === 'jpg'
+        ||  $type === 'jpeg' || $type === 'gif';
+    }
+
     function add_attachment_color_field( $form_fields, $post ) {
+        $filetype = $this->getFileType($post);
+        if(!$this->isImage($filetype)) return;
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-background', true );
         $savedColor = $this->getInitialColor();
         $viewColor = $field_value ? $field_value : $savedColor;
@@ -243,11 +258,8 @@ class resizeForDiscoverAttachmentPage{
             'tr' => $text_color_js, // Adds free-form stuff to table.
         );
 
-        $imagepath= get_attached_file($post->ID);
-        $type = wp_check_filetype($imagepath);
-
         //for transparent checkbox
-        if($type['ext'] === 'png' || $type['ext'] === 'gif'){
+        if($filetype === 'png' || $filetype === 'gif'){
             $saveTransparent = get_option( resizeForDiscoverSettingsPage::OPTION );
             $saveTransparent = empty($saveTransparent['field1']['resize-for-discover-transparent']) ? '' :  'transparent';
             $field_value = $field_value === '' ? $saveTransparent : $field_value;
@@ -273,6 +285,8 @@ class resizeForDiscoverAttachmentPage{
     }
 
     function add_attachment_overwrite_field( $form_fields, $post ) {
+        $filetype = $this->getFileType($post);
+        if(!$this->isImage($filetype)) return;
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-overwrite', true );
         $saveOverwrite = get_option( resizeForDiscoverSettingsPage::OPTION );
         $saveOverwrite = empty($saveOverwrite['field1']['resize-for-discover-overwrite']) ? 0 :  1;
@@ -297,6 +311,8 @@ class resizeForDiscoverAttachmentPage{
     }
 
     function add_attachment_resize_field( $form_fields, $post ) {
+        $filetype = $this->getFileType($post);
+        if(!$this->isImage($filetype)) return;
         $field_value = get_post_meta( $post->ID, 'resize-for-discover', true );
         $form_fields['resize-for-discover'] = array(
             'input' => 'html',
