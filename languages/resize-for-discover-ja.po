@@ -5,8 +5,8 @@ msgstr ""
 "Project-Id-Version: Resize for discover 0.0.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/resize-for-"
 "discover\n"
-"POT-Creation-Date: 2020-06-29 00:34+0900\n"
-"PO-Revision-Date: 2020-06-29 00:35+0900\n"
+"POT-Creation-Date: 2020-07-11 21:34+0900\n"
+"PO-Revision-Date: 2020-07-11 21:34+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ja_JP\n"
@@ -52,114 +52,124 @@ msgstr "固定,>=1200 x >=900"
 msgid "fixed, to >=1200 x >=675"
 msgstr "固定,>=1200 x >=675"
 
-#: Resize-for-discover.php:170
+#: Resize-for-discover.php:195
 msgid "Background color for resize"
 msgstr "リサイズ時の背景色"
 
-#: Resize-for-discover.php:252 Resize-for-discover.php:561
+#: Resize-for-discover.php:309 Resize-for-discover.php:632
 msgid "Transparent"
 msgstr "透過"
 
-#: Resize-for-discover.php:262
+#: Resize-for-discover.php:311
 msgid "If you fill the checkbox, This setting takes priority."
 msgstr "チェックした場合、透過が優先されます。"
 
-#: Resize-for-discover.php:283 Resize-for-discover.php:574
+#: Resize-for-discover.php:334 Resize-for-discover.php:645
 msgid "Overwrite"
 msgstr "上書き"
 
-#: Resize-for-discover.php:302
+#: Resize-for-discover.php:355
 msgid "Raito"
 msgstr "比率"
 
-#: Resize-for-discover.php:312
+#: Resize-for-discover.php:365
 msgid "select"
 msgstr "選択してください"
 
-#: Resize-for-discover.php:321
+#: Resize-for-discover.php:374
 msgid ""
 "If this width is shorter than 1200px or pixel is smaller than 800000 pixel,"
 "the picture will be resized to this conditions."
 msgstr ""
 "横1200px以下ピクセル数8万pixelの場合、これを満たすようにリサイズされます。"
 
-#: Resize-for-discover.php:328
+#: Resize-for-discover.php:381
 msgid "Saved."
 msgstr ""
 
-#: Resize-for-discover.php:403
+#: Resize-for-discover.php:386
+msgid "Reload window"
+msgstr "画面更新"
+
+#: Resize-for-discover.php:390
+msgid ""
+"Press this button when you select the above ratio but the screen does not "
+"reload."
+msgstr "比率を選択しても画面が更新されない場合、このボタンを押してください。"
+
+#: Resize-for-discover.php:474
 msgid "Resize For Discover Settings"
 msgstr ""
 
-#: Resize-for-discover.php:406 Resize-for-discover.php:425
+#: Resize-for-discover.php:477 Resize-for-discover.php:496
 msgid "Initial setting"
 msgstr "初期設定"
 
-#: Resize-for-discover.php:407
+#: Resize-for-discover.php:478
 msgid "Resize post thumbnails"
 msgstr "投稿ページのアイキャッチをリサイズ"
 
-#: Resize-for-discover.php:429
+#: Resize-for-discover.php:500
 msgid "Resize and register all post thumbail"
 msgstr "投稿ページアイキャッチをリサイズ"
 
-#: Resize-for-discover.php:456
+#: Resize-for-discover.php:527
 msgid "Either check all resize or Input Post IDs."
 msgstr ""
 "「すべての投稿ページアイキャッチをリサイズする」にチェックを入れるかPost ID"
 "を入力してください。"
 
-#: Resize-for-discover.php:482
+#: Resize-for-discover.php:553
 msgid " does not have eyecatch or does not exist."
 msgstr "はアイキャッチがないか、存在しません。"
 
-#: Resize-for-discover.php:505
+#: Resize-for-discover.php:576
 msgid "'s eyecactch is not resized. Because This image is too big.<br>\n"
 msgstr ""
 "のアイキャッチはリサイズされません。なぜなら、この画像は大きすぎるからです。"
 "<br>\n"
 
-#: Resize-for-discover.php:544
+#: Resize-for-discover.php:615
 msgid "Letter box color"
 msgstr "レターボックスの色"
 
-#: Resize-for-discover.php:598
+#: Resize-for-discover.php:669
 msgid "Register new Image Size"
 msgstr "新しい画像サイズを登録する"
 
-#: Resize-for-discover.php:602
+#: Resize-for-discover.php:673
 msgid "Registers Below new Image Size."
 msgstr "以下の画像サイズを新しく登録します。"
 
-#: Resize-for-discover.php:604
+#: Resize-for-discover.php:675
 msgid "1200 x 675"
 msgstr ""
 
-#: Resize-for-discover.php:605
+#: Resize-for-discover.php:676
 msgid "1200 x 900"
 msgstr ""
 
-#: Resize-for-discover.php:606
+#: Resize-for-discover.php:677
 msgid "1200 x 1200"
 msgstr ""
 
-#: Resize-for-discover.php:620
+#: Resize-for-discover.php:691
 msgid "Resize images that are less than 1200px wide or less than 800000px."
 msgstr "横1200px,ピクセル数8万以下の場合アイキャッチをリサイズします。"
 
-#: Resize-for-discover.php:623
+#: Resize-for-discover.php:694
 msgid "ratio"
 msgstr "比率"
 
-#: Resize-for-discover.php:638
+#: Resize-for-discover.php:709
 msgid "Resize and register all post thumbnails"
 msgstr "すべての投稿ページアイキャッチをリサイズする"
 
-#: Resize-for-discover.php:644
+#: Resize-for-discover.php:715
 msgid "Post ID"
 msgstr ""
 
-#: Resize-for-discover.php:647
+#: Resize-for-discover.php:718
 msgid ""
 "Input post IDs with thumbnail you want to resize, <br> separated by commas."
 msgstr ""

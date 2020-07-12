@@ -74,7 +74,8 @@ class resizeForDiscover{
      * @return string
      */
     public static function toWPlocalPath($path){
-        return dirname($path) . '/' . basename($path);
+        $pathInfo = ImageResizerForDiscover::mb_pathinfo($path);
+        return $pathInfo['dirname'] . '/' . $pathInfo['basename'];
     }
 
     public function wpColorPickerScript(){
@@ -119,12 +120,17 @@ class resizeForDiscover{
 class resizeForDiscoverAttachmentPage{
 
     public function __construct(){
+        add_action( 'admin_init', array( $this,'init_session_start'));
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_color_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_overwrite_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
         add_action( 'edit_attachment', array( $this, 'save_attachment_resize' )  );
         add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ), 99999);
+    }
 
+
+    function init_session_start(){
+        if(session_status() !== PHP_SESSION_ACTIVE) session_start();
     }
 
     function resizeBackgroundColorScript(){
@@ -174,8 +180,12 @@ class resizeForDiscoverAttachmentPage{
 
     function add_attachment_color_field( $form_fields, $post ) {
         $filetype = $this->getFileType($post);
-        if(!$this->isImage($filetype)) return;
+        if(!$this->isImage($filetype)) return $form_fields;
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-background', true );
+        $nonce = resizeForDiscover::randomString(7);
+        $_SESSION['resize-for-discover-nonce'][$post->ID] = $nonce;
+        $form_fields['resize-for-discover-nonce'] = array('input' => 'hidden', 'value' => $nonce);
+        //$nonce = wp_create_nonce(resizeForDiscoverAttachmentPage::NONCE.$post->ID );
         $savedColor = $this->getInitialColor();
         $viewColor = $field_value ? $field_value : $savedColor;
         $transparentBool = $field_value === 'transparent';
@@ -200,13 +210,9 @@ class resizeForDiscoverAttachmentPage{
             }
             return exist;
          }
-         let mediaReload = function (records){
-            if(!existSaveWaiting(records)){
-                jQuery('.resize-for-discover-spinner').addClass('save-waiting');
-                return;
-            }
 
-            // get wp outside iframe
+         let mediaReloader = function (){
+                         // get wp outside iframe
             var wp = parent.wp;
 
             // switch tabs (required for the code below)
@@ -214,25 +220,49 @@ class resizeForDiscoverAttachmentPage{
 
             // refresh
             if( wp.media.frame.content.get() !== null) {
+                console.log(wp.media.frame.content.get());
                 wp.media.frame.content.get().collection.props.set({ignore: (+ new Date())});
                 wp.media.frame.content.get().options.selection.reset();
             } else {
+                console.log(wp.media.frame.content.get());
                 wp.media.frame.library.props.set ({ignore: (+ new Date())});
             }
+
+         }
+         let autoReload = function (records){
+            console.log(records);
+            if(!existSaveWaiting(records)){
+                jQuery('.resize-for-discover-spinner').addClass('save-waiting');
+                return;
+            }
+            mediaReloader();
         };
         jQuery(function($){
+            let nowPage = location.href.indexOf('upload.php');
+            let reloderElm = $('.resize-for-discover-reloader');
             $('[name$="[resize-for-discover-background]"]').myColorPicker();
-
+            if(nowPage > 0){
+                reloderElm.hide();
+            }else{
+                reloderElm.on('click',mediaReloader);
+            }
+            
             //reload attachment page 
             $('.resize-for-discover-select').change(function(){
                 let reloadFlg = false;
                 let observer;
                 let modal;
-                let nowPage = location.href.indexOf('upload.php');
                 if(nowPage == -1 && $('.media-sidebar').length>0){
                     reloadFlg = true;
-                    modal = document.getElementsByClassName('media-sidebar')[0].querySelector('.attachment-details');
-                    observer = new MutationObserver(function(records){mediaReload(records)});
+                    modals = document.getElementsByClassName('media-sidebar');
+                    let length = modals.length;
+                    for (let index = 0; index < length; index++) {
+                        modal = modals[index].querySelector('.attachment-details');
+                        if(modal){
+                            break;
+                        }
+                    }
+                    observer = new MutationObserver(function(records){autoReload(records)});
                 }else if(nowPage > 0 && $('.edit-attachment-frame').length>0){
                     reloadFlg = true;
                     modal = document.getElementsByClassName('edit-attachment-frame')[0].querySelector('.attachment-details');
@@ -241,13 +271,19 @@ class resizeForDiscoverAttachmentPage{
                         location.reload();
                     });
                 }
+                console.log('reloadFlg');
                 if(reloadFlg){
-                    reloadFlg = true;
-                    observer.observe(modal, {
-                        attributes: true,
-                        attributeOldValue :true,
-                        attributeFilter: ['class']
-                    });
+                    if(modal){
+                        console.log('observer.observe');
+                        console.log(observer);
+                        observer.observe(modal, {
+                            attributes: true,
+                            attributeOldValue :true,
+                            attributeFilter: ['class']
+                        });
+                    }else{
+                        console.warn('This window cannnot be reloaded.');
+                    }
                 }
             });
         });
@@ -286,7 +322,7 @@ class resizeForDiscoverAttachmentPage{
 
     function add_attachment_overwrite_field( $form_fields, $post ) {
         $filetype = $this->getFileType($post);
-        if(!$this->isImage($filetype)) return;
+        if(!$this->isImage($filetype)) return $form_fields;
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-overwrite', true );
         $saveOverwrite = get_option( resizeForDiscoverSettingsPage::OPTION );
         $saveOverwrite = empty($saveOverwrite['field1']['resize-for-discover-overwrite']) ? 0 :  1;
@@ -312,7 +348,7 @@ class resizeForDiscoverAttachmentPage{
 
     function add_attachment_resize_field( $form_fields, $post ) {
         $filetype = $this->getFileType($post);
-        if(!$this->isImage($filetype)) return;
+        if(!$this->isImage($filetype)) return $form_fields;
         $field_value = get_post_meta( $post->ID, 'resize-for-discover', true );
         $form_fields['resize-for-discover'] = array(
             'input' => 'html',
@@ -345,13 +381,31 @@ class resizeForDiscoverAttachmentPage{
                 <span class="saved">'.  esc_html__( 'Saved.') .'</span>
             </span>
         </span>';
+        $form_fields['resize-for-discover']['html'] .=
+        '<button class="resize-for-discover-reloader button" type="button">'.
+             __( 'Reload window', resizeForDiscover::NAME) . 
+        '</button>';
+        $form_fields['resize-for-discover']['html'].=
+        '<p class="help">' . 
+        __( 'Press this button when you select the above ratio but the screen does not reload.',resizeForDiscover::NAME) . 
+        '</p>';
 
         return $form_fields;
     }
 
     function save_attachment_resize( $attachment_id ) {
         $color= '';
-        $values = $_REQUEST['attachments'][$attachment_id];
+        if(isset($_REQUEST['attachments'][$attachment_id])){
+            $values = $_REQUEST['attachments'][$attachment_id];
+        }else{
+            return;
+        }
+        
+        if (!isset($_SESSION['resize-for-discover-nonce'])
+        || $values['resize-for-discover-nonce'] !== $_SESSION['resize-for-discover-nonce'][$attachment_id]) {
+            return;
+        }
+        unset($_SESSION['resize-for-discover-nonce']);
         if(!empty($values['resize-for-discover-transparent'])){
             $color =$values['resize-for-discover-transparent'];
         }elseif (!empty( $values['resize-for-discover-background'])) {
