@@ -220,17 +220,14 @@ class resizeForDiscoverAttachmentPage{
 
             // refresh
             if( wp.media.frame.content.get() !== null) {
-                console.log(wp.media.frame.content.get());
                 wp.media.frame.content.get().collection.props.set({ignore: (+ new Date())});
                 wp.media.frame.content.get().options.selection.reset();
             } else {
-                console.log(wp.media.frame.content.get());
                 wp.media.frame.library.props.set ({ignore: (+ new Date())});
             }
 
          }
          let autoReload = function (records){
-            console.log(records);
             if(!existSaveWaiting(records)){
                 jQuery('.resize-for-discover-spinner').addClass('save-waiting');
                 return;
@@ -242,7 +239,8 @@ class resizeForDiscoverAttachmentPage{
             let reloderElm = $('.resize-for-discover-reloader');
             $('[name$="[resize-for-discover-background]"]').myColorPicker();
             if(nowPage > 0){
-                reloderElm.hide();
+                reloderElm.hide();                
+                $('.reloader-help').hide();
             }else{
                 reloderElm.on('click',mediaReloader);
             }
@@ -271,11 +269,8 @@ class resizeForDiscoverAttachmentPage{
                         location.reload();
                     });
                 }
-                console.log('reloadFlg');
                 if(reloadFlg){
                     if(modal){
-                        console.log('observer.observe');
-                        console.log(observer);
                         observer.observe(modal, {
                             attributes: true,
                             attributeOldValue :true,
@@ -386,7 +381,7 @@ class resizeForDiscoverAttachmentPage{
              __( 'Reload window', resizeForDiscover::NAME) . 
         '</button>';
         $form_fields['resize-for-discover']['html'].=
-        '<p class="help">' . 
+        '<p class="help reloader-help">' . 
         __( 'Press this button when you select the above ratio but the screen does not reload.',resizeForDiscover::NAME) . 
         '</p>';
 
