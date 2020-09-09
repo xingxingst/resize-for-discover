@@ -386,7 +386,6 @@ class resizeForDiscoverAttachmentPage{
             return;
         }
         
-        unset($_SESSION['resize-for-discover-nonce']);
         if(!empty($values['resize-for-discover-transparent'])){
             $color =$values['resize-for-discover-transparent'];
         }elseif (!empty( $values['resize-for-discover-background'])) {
