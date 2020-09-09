@@ -120,17 +120,11 @@ class resizeForDiscover{
 class resizeForDiscoverAttachmentPage{
 
     public function __construct(){
-        add_action( 'admin_init', array( $this,'init_session_start'));
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_color_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_overwrite_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
         add_action( 'edit_attachment', array( $this, 'save_attachment_resize' )  );
         add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ), 99999);
-    }
-
-
-    function init_session_start(){
-        if(session_status() !== PHP_SESSION_ACTIVE) session_start();
     }
 
     function resizeBackgroundColorScript(){
@@ -182,10 +176,6 @@ class resizeForDiscoverAttachmentPage{
         $filetype = $this->getFileType($post);
         if(!$this->isImage($filetype)) return $form_fields;
         $field_value = get_post_meta( $post->ID, 'resize-for-discover-background', true );
-        $nonce = resizeForDiscover::randomString(7);
-        $_SESSION['resize-for-discover-nonce'][$post->ID] = $nonce;
-        $form_fields['resize-for-discover-nonce'] = array('input' => 'hidden', 'value' => $nonce);
-        //$nonce = wp_create_nonce(resizeForDiscoverAttachmentPage::NONCE.$post->ID );
         $savedColor = $this->getInitialColor();
         $viewColor = $field_value ? $field_value : $savedColor;
         $transparentBool = $field_value === 'transparent';
@@ -212,7 +202,7 @@ class resizeForDiscoverAttachmentPage{
          }
 
          let mediaReloader = function (){
-                         // get wp outside iframe
+            // get wp outside iframe
             var wp = parent.wp;
 
             // switch tabs (required for the code below)
@@ -396,10 +386,6 @@ class resizeForDiscoverAttachmentPage{
             return;
         }
         
-        if (!isset($_SESSION['resize-for-discover-nonce'])
-        || $values['resize-for-discover-nonce'] !== $_SESSION['resize-for-discover-nonce'][$attachment_id]) {
-            return;
-        }
         unset($_SESSION['resize-for-discover-nonce']);
         if(!empty($values['resize-for-discover-transparent'])){
             $color =$values['resize-for-discover-transparent'];
@@ -424,7 +410,7 @@ class resizeForDiscoverAttachmentPage{
             $resizeIns = new ImageResizerForDiscover($imagepath,$overwrite, $color);
 
             if(!$overwrite) 
-                $resizeIns->setSuffix('-'. resizeForDiscover::randomString() . '-' . $mode);
+                $resizeIns->setSuffix('-'. ltrim($color,'#') . '-' . $mode);
 
             try {
                 $saveResult = $resizeIns ->resizeForDiscover($mode, true);
