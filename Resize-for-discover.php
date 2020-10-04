@@ -124,7 +124,17 @@ class resizeForDiscoverAttachmentPage{
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_overwrite_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
         add_action( 'edit_attachment', array( $this, 'save_attachment_resize' )  );
+        add_action( 'admin_head',  array( $this,'admin_media_custom_head'));
         add_action( 'admin_print_footer_scripts', array( $this, 'resizeBackgroundColorScript' ), 99999);
+    }
+
+
+    function admin_media_custom_head() {
+    ?>
+        <style type="text/css">
+        .compat-field-resize-for-discover-background td.field{width: 100%;}
+        </style>
+    <?php
     }
 
     function resizeBackgroundColorScript(){
