@@ -1,6 +1,5 @@
 ﻿=== Resize for discover ===
-Contributors: xingxingst
-Tags: image,seo,quality,resize,scale,thumbnail,thumbnails
+
 Requires at least: 5.4.2
 Tested up to: 5.4.2
 Stable tag: 0.0.1
@@ -24,25 +23,13 @@ You can resize images for google discover and AMP⚡ by using this wp plugin.
 
 == Installation ==
 
-1. From the WP admin panel, click “Plugins” -> “Add new”.
-2. In the browser input box, type “Resize for discover”.
-3. Select the “Resize for discover” plugin and click “Install”.
-4. Activate the plugin.
-
-OR…
-
 1. Download the plugin from this page.
 2. Save the .zip file to a location on your computer.
 3. Open the WP admin panel, and click “Plugins” -> “Add new”.
 4. Click “upload”.. then browse to the .zip file downloaded from this page.
 5. Click “Install”.. and then “Activate plugin”.
 
-
-== Frequently asked questions ==
-
-
-
-== Screenshots ==
+== Screenshots(aseets Folder) ==
 
 1. Resize image settings in the media page.
 2. Intial settings
