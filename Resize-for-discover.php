@@ -420,6 +420,9 @@ class resizeForDiscoverAttachmentPage{
 
             if(!$overwrite) 
                 $resizeIns->setSuffix('-'. ltrim($color,'#') . '-' . $mode);
+                //重複を防ぐ
+                $resizeIns->setSavePath();
+                if(file_exists($resizeIns->getSavePath())) return;
 
             try {
                 $saveResult = $resizeIns ->resizeForDiscover($mode, true);
