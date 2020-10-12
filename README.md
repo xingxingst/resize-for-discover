@@ -1,4 +1,5 @@
 ﻿このプラグインについての詳しい日本語の説明や使い方などは以下から
+
 https://www.trade-tech-note.work/resize-for-discover/
 
 
