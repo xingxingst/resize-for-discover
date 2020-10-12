@@ -1,7 +1,11 @@
-﻿=== Resize for discover ===
+﻿このプラグインについての詳しい日本語の説明や使い方などは以下から
+https://www.trade-tech-note.work/resize-for-discover/
 
-Requires at least: 5.4.2
-Tested up to: 5.4.2
+
+=== Resize for discover ===
+
+Requires at least: 5.5.1
+Tested up to: 5.5.1
 Stable tag: 0.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
