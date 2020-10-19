@@ -7,7 +7,7 @@
   Domain Path: /languages/
   Version: 0.0.1
   Author:  xingxingst
-  Author URI: 
+  Author URI: https://trade-tech-note.work/
   License: GPLv2 or later
   https://developers.google.com/search/docs/data-types/article?#article_types
  */
