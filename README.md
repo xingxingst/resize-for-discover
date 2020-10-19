@@ -5,7 +5,7 @@ https://www.trade-tech-note.work/resize-for-discover/
 
 === Resize for discover ===
 
-Requires at least: 5.5.1
+Requires at least: 5.4.2
 Tested up to: 5.5.1
 Stable tag: 0.0.1
 License: GPLv2 or later
@@ -19,7 +19,7 @@ You can resize images for google discover and AMP⚡ by using this wp plugin.
 * You can resize images for google discover and AMP⚡ by using this wp plugin.
    *  There are options to resize which are 1:1, 4:3, 16:9, >=1200 x >=1200,  >=1200 x >=900, >=1200 x >=675 (width x height)
    *  If a width of image is shorter than 1200px or pixel is smaller than 800000 pixel,the images will be resized to this conditions.
-   *  A minimum width of 1200px is a requirement for google discover.
+   *  Google discover and AMP⚡ recommends images with a minimum width of 1200px.
    *  The point is that you can resize small images to big for google discover.
 
 * Resize post thumbnails together for google discover.

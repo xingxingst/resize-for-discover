@@ -8,7 +8,7 @@
   Version: 0.0.1
   Author:  xingxingst
   Author URI: 
-  License: GPL
+  License: GPLv2 or later
   https://developers.google.com/search/docs/data-types/article?#article_types
  */
 if ( ! defined( 'ABSPATH' ) ) {
