@@ -63,10 +63,6 @@ class resizeForDiscover{
         return $attach_id;
     }
 
-    public static function randomString($length = 3){
-        return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyz'), 0, $length);
-    }
-
     /**
      * remove backslash etc.
      *
@@ -459,13 +455,25 @@ class resizeForDiscoverSettingsPage
 
 	function add_menu() {
         add_options_page( 'Resize For Discover Settings', 'Resize For Discover', 'manage_options', self::SLUG, array( $this, 'create_page' ) );
-	}
+    }
+    
+    function getActiveTab(){
+        if(isset( $_GET['tab'] )){
+            $active_tab = strval($_GET['tab']);
+            if( $active_tab  === 'tab-page1'){
+                return 'tab-page1';
+            }elseif ($active_tab  === 'tab-page2') {
+                return 'tab-page2';
+            }
+        }
+        return 'tab-page1';
+    }
 
 	function create_page() {
 		?>
 		<div class="wrap">
 			<h1><?php _e("Resize For Discover Settings", resizeForDiscover::NAME); ?></h1>
-			<?php $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'tab-page1'; ?>
+			<?php $active_tab = $this->getActiveTab(); ?>
 			<h2 class="nav-tab-wrapper">
 				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page1" class="nav-tab <?php echo $active_tab == 'tab-page1' ? 'nav-tab-active' : ''; ?>"><?php _e("Initial setting", resizeForDiscover::NAME); ?></a>
 				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page2" class="nav-tab <?php echo $active_tab == 'tab-page2' ? 'nav-tab-active' : ''; ?>"><?php _e("Resize post thumbnails", resizeForDiscover::NAME); ?></a>
@@ -483,7 +491,7 @@ class resizeForDiscoverSettingsPage
 
 	function init_page() {
 		$this->options = get_option( self::OPTION );
-		$active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'tab-page1';
+		$active_tab = $this->getActiveTab();
 		switch ( $active_tab ){
 			case 'tab-page1':
 				add_settings_section( 'resize_for_discover_section1', __("Initial setting", resizeForDiscover::NAME), '__return_false', self::SLUG);
@@ -501,11 +509,12 @@ class resizeForDiscoverSettingsPage
         $output = get_option( self::OPTION );
 
 		if ( isset( $input['field1'] ) ){
-            $output['field1']['resize-for-discover-background'] = $input['field1']['resize-for-discover-background'];
+            $output['field1']['resize-for-discover-background'] =
+            sanitize_hex_color($input['field1']['resize-for-discover-background']);
 
             $output['field1']['resize-for-discover-transparent'] = 
-            empty($input['field1']['resize-for-discover-transparent'])
-            ? '' : $input['field1']['resize-for-discover-transparent'];
+            empty($input['field1']['resize-for-discover-transparent']) && $input['field1']['resize-for-discover-transparent'] !== 'transparent'
+            ? '' : 'transparent';
 
             $output['field1']['resize-for-discover-overwrite'] = 
             empty($input['field1']['resize-for-discover-overwrite'])
@@ -526,17 +535,24 @@ class resizeForDiscoverSettingsPage
 
             $color = empty($input['field2']['resize-for-discover-background'])
             ? resizeForDiscover::INITIALCOLOR 
-            : $input['field2']['resize-for-discover-background'];
+            : sanitize_hex_color($input['field2']['resize-for-discover-background']);
 
-            $transparent = empty($input['field2']['transparent'])
-            ? '' : $input['field2']['transparent'];
+            $transparent =
+            empty($input['field2']['transparent'])  && $input['field1']['transparent'] !== 'transparent'
+            ? '' : 'transparent';
 
-            $this->resizeAndInsertThumbFromID($input['field2']['ratio'], $postIDs, $color, $transparent);
+            $mode = (int)$input['field2']['ratio'];
+            if($mode < 0 || $mode > 9){
+                add_settings_error( self::SLUG, 'message', __('Invalid ratio value.'));
+                return $output;
+            }
+
+            $this->resizeAndInsertThumbFromID($mode, $postIDs, $color, $transparent);
         }
 		return $output;
     }
 
-    private function resizeAndInsertThumbFromID($mode, $postIDs, $color, $transparent){
+    function resizeAndInsertThumbFromID($mode, $postIDs, $color, $transparent){
         $resizedImage=[];
         $error = '';
         $updateFlg = false;
@@ -554,7 +570,7 @@ class resizeForDiscoverSettingsPage
             $resizeIns = new ImageResizerForDiscover($imagepath, false, $applyColor);
             try {
                 // throw new Exception('exception'); //for messege check
-                $saveResult = $resizeIns ->resizeForDiscover((int)$mode);
+                $saveResult = $resizeIns ->resizeForDiscover($mode);
                 if($saveResult){
                     $imagepath = $resizeIns->getSavePath();
                     $imagepath = resizeForDiscover::toWPlocalPath($imagepath);
