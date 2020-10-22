@@ -109,13 +109,14 @@ class resizeForDiscover{
     public function load_lang_strings(){
         load_plugin_textdomain( self::NAME, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
     }
+    
 }
 
 
 
 class resizeForDiscoverAttachmentPage{
 
-    public function __construct(){
+    function __construct(){
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_color_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_overwrite_field' ), 10, 2 );
         add_filter( 'attachment_fields_to_edit',array( $this, 'add_attachment_resize_field' ), 10, 2 );
@@ -157,7 +158,7 @@ class resizeForDiscoverAttachmentPage{
         <?php
     }
 
-    private function getInitialColor(){
+    function getInitialColor(){
         $saveColor = get_option( resizeForDiscoverSettingsPage::OPTION );
 
         return empty($saveColor['field1']['resize-for-discover-background'])
@@ -165,7 +166,7 @@ class resizeForDiscoverAttachmentPage{
         : $saveColor['field1']['resize-for-discover-background'];
     }
 
-    private function getFileType($post){
+    function getFileType($post){
         $imagepath= get_attached_file($post->ID);
         $type = wp_check_filetype($imagepath);
 
@@ -173,7 +174,7 @@ class resizeForDiscoverAttachmentPage{
     }
 
 
-    private function isImage($type){
+    function isImage($type){
         return $type === 'png' || $type === 'jpg'
         ||  $type === 'jpeg' || $type === 'gif';
     }
@@ -187,7 +188,7 @@ class resizeForDiscoverAttachmentPage{
         $transparentBool = $field_value === 'transparent';
         $form_fields['resize-for-discover-background'] = array(
             'input' => 'text',
-            'value' => $transparentBool ? '' : $viewColor,
+            'value' => $transparentBool ? '' : esc_attr($viewColor),
             'label' => __( 'Background color for resize',resizeForDiscover::NAME),
         );
 
@@ -327,14 +328,16 @@ class resizeForDiscoverAttachmentPage{
         return $form_fields;
     }
 
-    private function fieldCheckboxHTML( $postID, $index, $value, $field_value, $text) {
-        $label = $index .'-'. $postID;
+    function fieldCheckboxHTML( $postID, $index, $value, $field_value, $text) {
+        $label = esc_attr($index .'-'. $postID);
         $checked =  $field_value== $value ? " checked='checked'" : '';
-        return "<label for='{$label}'>
-            <input type='checkbox' id='{$label}' name='attachments[{$postID}][{$index}]' value='{$value}'{$checked}
+        $nameAttr = esc_attr("attachments[{$postID}][{$index}]");
+        $value = esc_attr($value);
+        $result = "<label for='{$label}'>
+            <input type='checkbox' id='{$label}' name='{$nameAttr}' value='{$value}'{$checked}
             /> {$text} 
         </label>";
-        
+        return $result;
     }
 
     function add_attachment_resize_field( $form_fields, $post ) {
@@ -344,9 +347,6 @@ class resizeForDiscoverAttachmentPage{
         $form_fields['resize-for-discover'] = array(
             'input' => 'html',
             'label' => __( 'Raito', resizeForDiscover::NAME),
-            // 'helps' => 
-            // __( 'If this width is shorter than 1200px or pixel is smaller than 800000 pixel,the picture will be resized to this conditions.',
-            // resizeForDiscover::NAME)
         );
 
         $form_fields['resize-for-discover']['html']
@@ -357,6 +357,7 @@ class resizeForDiscoverAttachmentPage{
         
         foreach(resizeForDiscover::ratios() as $key => $value){
             $selected = (int)$field_value === $key ? 'selected' : '';
+            $key = esc_attr($key);
             $text = $value;
             $form_fields['resize-for-discover']['html'] .= "<option value='{$key}' {$selected}>{$text}</option>\n";
         }
@@ -366,7 +367,7 @@ class resizeForDiscoverAttachmentPage{
         $style =
         'position: initial; overflow: initial; top: initial; bottom: initial; right: initial; left: initial; box-shadow: initial;';
         $form_fields['resize-for-discover']['html'] .= 
-        '<span class="attachment-details resize-for-discover-spinner" style="'. $style . '">
+        '<span class="attachment-details resize-for-discover-spinner" style="'. esc_html($style) . '">
             <span class="settings-save-status" role="status">
                 <span class="spinner"></span>
                 <span class="saved">'.  esc_html__( 'Saved.') .'</span>
@@ -386,8 +387,9 @@ class resizeForDiscoverAttachmentPage{
 
     function save_attachment_resize( $attachment_id ) {
         $color= '';
-        if(isset($_REQUEST['attachments'][$attachment_id])){
-            $values = $_REQUEST['attachments'][$attachment_id];
+        if(isset($_REQUEST['attachments'][$attachment_id])
+        && is_array($_REQUEST['attachments'][$attachment_id])){
+            $values =  array_map( 'esc_attr', $_REQUEST['attachments'][$attachment_id] );;
         }else{
             return;
         }
@@ -411,7 +413,6 @@ class resizeForDiscoverAttachmentPage{
             if($mode === "-1") return;
             $imagepath = get_attached_file($attachment_id);
             $color = empty($color) ? get_post_meta($attachment_id, 'resize-for-discover-background', true ) : $color;
-            // $color = empty($color) ? $this->getInitialColor() : $color ;
             $resizeIns = new ImageResizerForDiscover($imagepath,$overwrite, $color);
 
             if(!$overwrite) 
@@ -475,8 +476,8 @@ class resizeForDiscoverSettingsPage
 			<h1><?php _e("Resize For Discover Settings", resizeForDiscover::NAME); ?></h1>
 			<?php $active_tab = $this->getActiveTab(); ?>
 			<h2 class="nav-tab-wrapper">
-				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page1" class="nav-tab <?php echo $active_tab == 'tab-page1' ? 'nav-tab-active' : ''; ?>"><?php _e("Initial setting", resizeForDiscover::NAME); ?></a>
-				<a href="?page=<?=self::SLUG?>&amp;tab=tab-page2" class="nav-tab <?php echo $active_tab == 'tab-page2' ? 'nav-tab-active' : ''; ?>"><?php _e("Resize post thumbnails", resizeForDiscover::NAME); ?></a>
+				<a href="?page=<?=esc_attr(self::SLUG)?>&amp;tab=tab-page1" class="nav-tab <?php echo $active_tab == 'tab-page1' ? 'nav-tab-active' : ''; ?>"><?php _e("Initial setting", resizeForDiscover::NAME); ?></a>
+				<a href="?page=<?=esc_attr(self::SLUG)?>&amp;tab=tab-page2" class="nav-tab <?php echo $active_tab == 'tab-page2' ? 'nav-tab-active' : ''; ?>"><?php _e("Resize post thumbnails", resizeForDiscover::NAME); ?></a>
 			</h2>
 			<form method="post" action="options.php">
 			<?php
@@ -597,15 +598,15 @@ class resizeForDiscoverSettingsPage
         }
     }
 
-    private function ratioListSelect($name,$checkedRatio=0){
+    function ratioListSelect($name,$checkedRatio=0){
         ?>
-        <select name="<?= $name ?>" >
+        <select name="<?= esc_attr($name) ?>" >
             <?php 
                 foreach (resizeForDiscover::ratios() as $val => $txt) {
             ?>
-                <option value="<?=$val?>"
-                <?= $checkedRatio == $val ? 'selected' : '' ?>>
-                <?=$txt?>
+                <option value="<?=esc_attr($val) ?>"
+                <?= $checkedRatio == $val ? esc_attr('selected') : esc_attr('') ?>>
+                <?= $txt ?>
             </label>
             <?php
             }
@@ -616,14 +617,14 @@ class resizeForDiscoverSettingsPage
 
 
 
-    private function input_color($array){
+    function input_color($array){
         $color = empty($this->options) || empty($this->options['field1']['resize-for-discover-background'])
         ? resizeForDiscover::INITIALCOLOR
         : $this->options['field1']['resize-for-discover-background'];
         ?>
         <th scope="row"><?php _e('Letter box color', resizeForDiscover::NAME); ?></th>
         <td>
-            <input type="text" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-background]" value="<?= $color ?>"> 
+            <input type="text" name="<?=esc_attr( self::OPTION . '[' . $array['field'] )?>][resize-for-discover-background]" value="<?= esc_attr($color) ?>"> 
         </td>
         <script>
             jQuery(document).ready(function($){
@@ -633,27 +634,27 @@ class resizeForDiscoverSettingsPage
         <?php
     }
 
-    private function checkbox_transparent($array){
+    function checkbox_transparent($array){
         $transparentChecked = empty($this->options)
         || empty($this->options['field1']['resize-for-discover-transparent']) 
         ? '' : ' checked="checked"';
         ?>
         <th scope="row"><label for="transparent"><?php _e('Transparent', resizeForDiscover::NAME); ?></label></th>
         <td>
-            <input id="transparent" type="checkbox" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-transparent]" value="transparent"<?= $transparentChecked ?>>
+            <input id="transparent" type="checkbox" name="<?= esc_attr(self::OPTION . '[' . $array['field'] )?>][resize-for-discover-transparent]" value="transparent"<?= esc_attr($transparentChecked) ?>>
         </td>
         <?php
     }
 
 
-    private function checkbox_overwrite($array){
+    function checkbox_overwrite($array){
         $overwriteChecked = empty($this->options)
         || empty($this->options['field1']['resize-for-discover-overwrite'])
         ? '' : ' checked="checked"';
         ?>
         <th scope="row"><label for="overwrite"><?php _e('Overwrite', resizeForDiscover::NAME); ?></label></th>
         <td>
-            <input id="overwrite" type="checkbox" name="<?= self::OPTION . '[' . $array['field'] ?>][resize-for-discover-overwrite]" value="1"<?= $overwriteChecked ?>>
+            <input id="overwrite" type="checkbox" name="<?= esc_attr(self::OPTION . '[' . $array['field']) ?>][resize-for-discover-overwrite]" value="1"<?=esc_attr($overwriteChecked) ?>>
         </td>
         <?php
     }
@@ -677,7 +678,7 @@ class resizeForDiscoverSettingsPage
                 <tr>
                     <th scope="row"><label for="new-image-size"><?php _e('Register new Image Size', resizeForDiscover::NAME); ?></label></th>
                     <td>
-                        <div style="margin-bottom: 1em;"><input id="new-image-size" type="checkbox" name="<?= self::OPTION ?>[field1][resize-for-discover-newsize]" value="1"<?= $newSizeChecked ?>></div>
+                        <div style="margin-bottom: 1em;"><input id="new-image-size" type="checkbox" name="<?= self::OPTION ?>[field1][resize-for-discover-newsize]" value="1"<?= esc_attr($newSizeChecked) ?>></div>
                         <div>
                             <p><?php _e('Registers Below new Image Size.', resizeForDiscover::NAME); ?></p>
                             <p>
@@ -717,13 +718,13 @@ class resizeForDiscoverSettingsPage
                 <tr>
                     <th scope="row"><label for="all-resize"><?php _e('Resize and register all post thumbnails', resizeForDiscover::NAME); ?></label></th>
                     <td>
-                        <input type="checkbox" id="all-resize" name="<?= self::OPTION ?>[field2][all]" value="1">
+                        <input type="checkbox" id="all-resize" name="<?= esc_attr(self::OPTION) ?>[field2][all]" value="1">
                     </td>
                 </tr>
                 <tr>
                     <th scope="row"><label for="resize-post-id"><?php _e("Post ID", resizeForDiscover::NAME); ?></label></th>
                     <td>
-                        <input type="text" pattern="^[0-9,]+$" id="resize-post-id" name="<?= self::OPTION ?>[field2][ids]"><br>
+                        <input type="text" pattern="^[0-9,]+$" id="resize-post-id" name="<?= esc_attr(self::OPTION) ?>[field2][ids]"><br>
                         <p><?php _e("Input post IDs with thumbnail you want to resize, <br> separated by commas.", resizeForDiscover::NAME); ?></p>
                     </td>
                 </tr>
