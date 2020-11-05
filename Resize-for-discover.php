@@ -27,6 +27,7 @@ class resizeForDiscover{
         add_action( 'admin_print_footer_scripts', array( $this, 'wpColorPickerScript' ),9);
         add_action( 'after_setup_theme', array( $this, 'addFeaturedImageSupport' ), 11 );
         add_action( 'after_setup_theme', array( $this, 'add_image_sizes' ), 12 );
+        add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
     }
 
     public static function ratios(){
@@ -109,7 +110,13 @@ class resizeForDiscover{
     public function load_lang_strings(){
         load_plugin_textdomain( self::NAME, false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
     }
-    
+
+    public function plugin_action_links( $links ) {
+        $url = admin_url( 'admin.php?page=' . resizeForDiscoverSettingsPage::SLUG );
+        $url = '<a href="' . esc_url( $url ) . '">' . __( 'Settings' ) . '</a>';
+        array_unshift( $links, $url );
+        return $links;
+    }
 }
 
 
