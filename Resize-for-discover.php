@@ -9,7 +9,6 @@
   Author:  xingxingst
   Author URI: https://trade-tech-note.work/
   License: GPLv2 or later
-  https://developers.google.com/search/docs/data-types/article?#article_types
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
