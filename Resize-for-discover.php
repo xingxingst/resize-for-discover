@@ -5,7 +5,7 @@
   Description: You can resize images for google discover and AMP⚡ by using this wp plugin.
   Text Domain: resize-for-discover
   Domain Path: /languages/
-  Version: 0.0.1
+  Version: 0.0.2
   Author:  xingxingst
   Author URI: https://trade-tech-note.work/
   License: GPLv2 or later
